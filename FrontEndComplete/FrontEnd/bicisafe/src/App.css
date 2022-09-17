@@ -47,3 +47,12 @@
 .padding-margin{
   line-height:0;
 }
+
+.botones_aplicacion{
+  background-color: #EBF6C0;
+  color: #282c34;
+  font-weight: bold;
+  padding-left: 35px;
+  padding-right: 35px;
+  border-radius: 25px;
+}

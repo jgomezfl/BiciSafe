@@ -8,6 +8,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NavBarExample from './Layouts/navbar';
 import MapView  from './Components/MapView';
 import Login from './Components/Login';
+import Register from './Components/Register';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path='/' element={<NavBarExample/>}>
             <Route index element={<MapView/>} />
             <Route path='login' element={<Login/>} />
+            <Route path='register' element={<Register/>} />
 
             <Route path='*' element={<Navigate replace to="/" />} />
           </Route>
