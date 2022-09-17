@@ -1,7 +1,13 @@
+import React, { useState } from "react";
+import { Button, Offcanvas } from 'react-bootstrap';
+
+
+
+
 const MapView = () => {
     return (
         <>
-            <h3>Mapa</h3>
+            <h1>Mapa</h1>
         </>
     );
 }

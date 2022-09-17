@@ -1,47 +1,82 @@
-import logo from "./../assets/logo.jpg";
+import React from "react";
+
+import logo from "./../assets/logo.png";
 import { FiUser } from 'react-icons/fi';
 
 import {Container, Nav, Navbar} from 'react-bootstrap';
+import { Row, Col, FormGroup, InputGroup, Button } from 'react-bootstrap';
 import { Outlet, Link} from "react-router-dom";
 
-import { useState } from 'react';
-import Offcanvas from 'react-bootstrap/Offcanvas';
+import { useState } from "react";
 
-const fontStyles = {fontSize: '40px'};
+import { Offcanvas } from 'react-bootstrap';
 
-const navbarExample = () => {
+const NavbarExample = () => {
+    const fontStyles = {fontSize: '40px'};
+    //const StyleLogo = {  }
+
+    const [show, setShow] = useState(false);
+  
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    function changeBackground(e){
+        e.target.style.backgroundColor = "#C6C6C6";
+    }
+
+    function changeBackgroundAgain(e){
+        e.target.style.backgroundColor = "transparent";
+    }
+
     return (
         <>
-            <Navbar className="color-nav" collapseOnSelect expand="lg" variant="light">
-                <Container>
+            <Navbar className="color-nav fluid" collapseOnSelect expand="lg" variant="light">
+            {/* <Container>
+                <Row className="show-grid">
+                    <Col md={10}>
+                    <FormGroup className="d-flex">
+                        <InputGroup type="search" className="me-2" placeholder="Search" />
+                    </FormGroup>
+                    </Col>
+                    <Col md={2}>
+                        <Button>Clear</Button>
+                    </Col>
+                </Row>
+            </Container> */}
+            <Container>
+                <Row>
+                    <Col>
+                        
+                    </Col>
+                </Row>
+            </Container>
+                <Nav.Link as={Link} to="/" className="mw-100" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                    <img
+                      onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}
+                      alt=""
+                      width="15%"
+                      heigth="15%"
+                      src={logo}
+                    />{' '}
+                </Nav.Link>
+                    
 
-                <Navbar.Brand className="justify-content-start">
-                            <Nav.Link as={Link} to="/">
-                                <img
-                                  alt=""
-                                  src={logo}
-                                  width="150"
-                                  height="70"
-                                  className="d-inline-block align-top"
-                                />{' '}
-                            </Nav.Link>
-                        </Navbar.Brand>
+                <Nav.Link onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain} className="">
+                    <FiUser onClick={handleShow} style={fontStyles} />
+                </Nav.Link>
 
-                    {/* <Nav.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} /> */}
-
-                    <Nav
-                        typeof="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarText"
-                        aria-controls="navbarText"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation"
-                    >
-                        <FiUser style={fontStyles} />
-                    </Nav>
-
-                </Container>
+                
             </Navbar>
+
+            <Offcanvas show={show} onHide={handleClose}>
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    Some text as placeholder. In real life you can have the elements you
+                    have chosen. Like, text, images, lists, etc.
+                </Offcanvas.Body>
+            </Offcanvas>
 
             <section>
                 <Outlet></Outlet>
@@ -50,4 +85,4 @@ const navbarExample = () => {
     );
 }
 
-export default navbarExample;
+export default NavbarExample;

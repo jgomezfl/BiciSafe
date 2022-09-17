@@ -38,5 +38,12 @@
 }
 
 .color-nav{
-  background-color: #bdd8df;
+  background-color: #EBF6C0;
+  padding: 0px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.padding-margin{
+  line-height:0;
 }
