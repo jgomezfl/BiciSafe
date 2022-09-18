@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { Button, Offcanvas } from 'react-bootstrap';
+import * as React from "react";
 
 
-
-
-const MapView = () => {
-    return (
-        <>
-            <h1>Mapa</h1>
-        </>
-    );
+export class MapView extends React.Component{
+    
+    render(){
+        return (
+            <>
+                MAPA
+            </>
+        );
+    }
 }
 
 export default MapView;

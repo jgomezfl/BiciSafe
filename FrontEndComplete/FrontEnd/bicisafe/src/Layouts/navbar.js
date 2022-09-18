@@ -9,10 +9,18 @@ import { Outlet, Link} from "react-router-dom";
 
 import { useState } from "react";
 
+//importamos API
+import API from "../services/http-common";
+
+//importamos until para retornar las promesas
+import { until } from "../Helpers/until";
+
 
 const NavbarExample = () => {
     const fontStyles = {fontSize: '40px'};
     //const StyleLogo = {  }
+
+    const [biciusuarios, setBiciusuarios] = useState([]);
 
     const [show, setShow] = useState(false);
 
@@ -21,11 +29,18 @@ const NavbarExample = () => {
 
     function changeBackground(e){
         e.target.style.backgroundColor = "#C6C6C6";
-    }
+    }//uwu
 
     function changeBackgroundAgain(e){
         e.target.style.backgroundColor = "transparent";
     }
+
+    const getBiciusuarios = async () => {
+        const [err, res] = await until(API.get("/all"));
+        if (err) return err.response.data?.message;
+        setBiciusuarios(res.data.data);
+        return res.data.data;
+    };
 
     return (
         <>
@@ -35,7 +50,7 @@ const NavbarExample = () => {
                     <img
                       onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}
                       width="100"
-                        height="15%"
+                      height="15%"
                       src={logo}
                       className="d-inline-block align-top"
                       alt="React Bootstrap logo"
@@ -83,14 +98,13 @@ const NavbarExample = () => {
                         <br />
                         <Row className="justify-content-md-center">
                             <Col md="auto">
-                                <Nav.Link><p>¿Olvidaste tu contraseña?</p></Nav.Link>
-                                
+                                <Nav.Link as={Link} to="/login" onClick={handleClose}><p><a href="">¿Olvidaste tu contraseña?</a></p></Nav.Link>
                             </Col>
                         </Row>
                         <br />
                         <Row className="justify-content-md-center">
                             <Col md="auto">
-                                <Nav.Link as={Link} to="/register" onClick={handleClose}><p>Registrarse</p></Nav.Link>
+                                <Nav.Link as={Link} to="/register" onClick={handleClose}><p><a href="">Registrarse</a></p></Nav.Link>
                             </Col>
                         </Row>
                     </Container>

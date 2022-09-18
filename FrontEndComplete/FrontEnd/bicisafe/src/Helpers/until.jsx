@@ -8,7 +8,7 @@ export function until(promise){
     if(Array.isArray(promise)){
         return Promise.all(promise)
             .then((results) => [null, results])
-            .catch((err) => [err, promiseOrPromiseList.map(() => undefined)]);
+            .catch((err) => [err, promise.map(() => undefined)]);
     }
 
     //Objeto único
