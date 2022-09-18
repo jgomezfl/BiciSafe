@@ -19,19 +19,19 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public Biciusuario getBiciusuario(Long identificacion){
-        Biciusuario bc = bcRepository.findById(identificacion).orElse(null);
+    public Biciusuario getBiciusuario(Long id) {
+        Biciusuario bc = bcRepository.findById(id).orElse(null);
         return bc;
     }
 
     @Override
-    public Biciusuario createBiciusuario(Biciusuario bc){
+    public Biciusuario createBiciusuario(Biciusuario bc) {
         return bcRepository.save(bc);
     }
 
     @Override
-    public Biciusuario deleteBiciusuario(Long identificacion){
-        Biciusuario bc = bcRepository.findById(identificacion).orElse(null);
+    public Biciusuario deleteBiciusuario(Long id) {
+        Biciusuario bc = bcRepository.findById(id).orElse(null);
         if(bc == null){
             return null;
         }
@@ -40,30 +40,24 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public Biciusuario updateBiciusuario(Long identificacion, String nombre, String apellido, String correo){
-        Biciusuario bc = bcRepository.findById(identificacion).orElse(null);
-        if(bc == null){
+    public Biciusuario updateBiciusuario(Biciusuario bc) {
+        Biciusuario bcTemp = bcRepository.findById(bc.getId()).orElse(null);
+        if(bcTemp == null){
             return null;
         }
-        bc.setNombre(nombre);
-        bc.setApellido(apellido);
-        bc.setCorreo(correo);
-        return bc;
+        return bcRepository.save(bc);
     }
 
     @Override
-    public List<Biciusuario> findByNombre(String nombre){
-        return bcRepository.findAllByNombre(nombre);
+    public List<Biciusuario> findAllByCorreoAndContrasena(String correo, String contrasena) {
+        return bcRepository.findAllByCorreoAndContrasena(correo, contrasena);
     }
+
+    @Override
+    public List<Biciusuario> findAll() {
+        return bcRepository.findAll();
+    }
+
     
-    @Override
-    public List<Biciusuario> findByApellido(String apellido){
-        return bcRepository.findAllByApellido(apellido);
-    }
-
-    @Override
-    public List<Biciusuario> findByCorreo(String correo){
-        return bcRepository.findAllByCorreo(correo);
-    }
 
 }

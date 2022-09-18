@@ -11,23 +11,24 @@ import lombok.NoArgsConstructor;
 public class Biciusuario {
     
     @Id
-    @Column(name ="identificacion")
-    private Long identificacion;
-    @Column(name = "nombre")
-    private String nombre;
-    @Column(name = "apellido")
-    private String apellido;
-    @Column(name = "correo")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "correo", unique = true, nullable = false)
     private String correo;
-    @Column(name = "contrasena")
+    @Column(name = "UserName", unique = true, nullable = false)
+    private String UserName;
+    @Column(name = "contrasena", nullable = false)
     private String contrasena;
+    @Column(name = "telefono")
+    private Long telefono;
 
-    public Biciusuario(Long identificacion, String nombre, String apellido, String correo, String contrasena){
-        this.identificacion = identificacion;
-        this.nombre = nombre;
-        this.apellido = apellido;
+
+    public Biciusuario(String correo, String UserName, String contrasena, Long telefono) {
         this.correo = correo;
+        this.UserName = UserName;
         this.contrasena = contrasena;
+        this.telefono = telefono;
     }
+    
 
 }

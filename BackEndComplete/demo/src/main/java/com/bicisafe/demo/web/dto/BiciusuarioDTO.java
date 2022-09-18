@@ -1,35 +1,19 @@
 package com.bicisafe.demo.web.dto;
 
 public class BiciusuarioDTO {
-    private Long identificacion;
-    private String nombre;
-    private String apellido;
+    private Long id;
     private String correo;
+    private String UserName;
     private String contrasena;
+    private Long telefono;
     
 
-    public Long getIdentificacion() {
-        return this.identificacion;
+    public Long getId() {
+        return this.id;
     }
 
-    public void setIdentificacion(Long identificacion) {
-        this.identificacion = identificacion;
-    }
-
-    public String getNombre() {
-        return this.nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getApellido() {
-        return this.apellido;
-    }
-
-    public void setApellido(String apellido) {
-        this.apellido = apellido;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getCorreo() {
@@ -38,8 +22,15 @@ public class BiciusuarioDTO {
 
     public void setCorreo(String correo) {
         this.correo = correo;
-    }    
-    
+    }
+
+    public String getUserName() {
+        return this.UserName;
+    }
+
+    public void setUserName(String UserName) {
+        this.UserName = UserName;
+    }
 
     public String getContrasena() {
         return this.contrasena;
@@ -48,5 +39,14 @@ public class BiciusuarioDTO {
     public void setContrasena(String contrasena) {
         this.contrasena = contrasena;
     }
+
+    public Long getTelefono() {
+        return this.telefono;
+    }
+
+    public void setTelefono(Long telefono) {
+        this.telefono = telefono;
+    }
+
 
 }

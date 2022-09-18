@@ -6,12 +6,11 @@ import com.bicisafe.demo.model.Biciusuario;
 
 public interface BiciusuarioService {
 
-    public Biciusuario getBiciusuario(Long identificacion);
+    public Biciusuario getBiciusuario(Long id);
     public Biciusuario createBiciusuario(Biciusuario bc);
-    public Biciusuario deleteBiciusuario(Long identificacion);
-    public Biciusuario updateBiciusuario(Long identificacion, String nombre, String apellido, String correo);
+    public Biciusuario deleteBiciusuario(Long id);
+    public Biciusuario updateBiciusuario(Biciusuario bc);
 
-    public List<Biciusuario> findByNombre(String nombre);
-    public List<Biciusuario> findByApellido(String apellido);
-    public List<Biciusuario> findByCorreo(String correo);
+    public List<Biciusuario> findAllByCorreoAndContrasena(String correo, String contrasena);
+    public List<Biciusuario> findAll();
 }

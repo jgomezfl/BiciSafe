@@ -19,6 +19,8 @@ import com.bicisafe.demo.model.Biciusuario;
 import com.bicisafe.demo.service.BiciusuarioService;
 import com.bicisafe.demo.web.dto.BiciusuarioDTO;
 
+import net.bytebuddy.asm.Advice.Return;
+
 @RestController
 @RequestMapping("/biciusuarios")
 public class BiciusuarioController {
@@ -30,69 +32,58 @@ public class BiciusuarioController {
         this.bcService = bcService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Biciusuario>> getBiciusuarios(@RequestParam(name = "nombre", required = false) String nombre,
-                                                             @RequestParam(name = "apellido", required = false) String apellido,
-                                                             @RequestParam(name = "correo", required = false) String correo){
-        List<Biciusuario> ListaBiciusuarios;
-        if(nombre != null && apellido == null && correo == null){
-            ListaBiciusuarios = bcService.findByNombre(nombre);
-        }else if(nombre == null && apellido != null && correo == null){
-            ListaBiciusuarios = bcService.findByApellido(apellido);
-        }else if(nombre == null && apellido == null && correo != null){
-            ListaBiciusuarios = bcService.findByCorreo(correo);
-        } else{
-            return ResponseEntity.noContent().build();
-        }
-        if(ListaBiciusuarios.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(ListaBiciusuarios);
-    }
-
-    @GetMapping("/{identificacion}")
-    public ResponseEntity<Biciusuario> getBiciusuario(@PathVariable("identificacion") Long identificacion){
-        Biciusuario bc = bcService.getBiciusuario(identificacion);
+    @GetMapping("/select/{id}")
+    public ResponseEntity<Biciusuario> getBiciusuario(@PathVariable("id") Long id){
+        Biciusuario bc = bcService.getBiciusuario(id);
         if(bc == null){
-            return null;
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(bc);
     }
 
-    @PostMapping
-    public ResponseEntity<Biciusuario> creatBiciusuario(@RequestBody BiciusuarioDTO bcDTO){
+    @GetMapping("/select/all")
+    public ResponseEntity<List<Biciusuario>> getAll(){
+        List<Biciusuario> Listbc = bcService.findAll();
+        if(Listbc.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(Listbc);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<Biciusuario> createBiciusuario(@RequestBody BiciusuarioDTO bcDto){
         Biciusuario bc = new Biciusuario(
-            bcDTO.getIdentificacion(),
-            bcDTO.getNombre(),
-            bcDTO.getApellido(),
-            bcDTO.getCorreo(),
-            bcDTO.getContrasena()
+            bcDto.getCorreo(),
+            bcDto.getUserName(),
+            bcDto.getContrasena(),
+            bcDto.getTelefono()
         );
         Biciusuario createdBc = bcService.createBiciusuario(bc);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBc);
     }
 
-    @DeleteMapping("/{identificacion}")
-    public ResponseEntity<Biciusuario> deleteBiciusuario(@PathVariable("identificacion") Long identificacion){
-        Biciusuario bcDeleted = bcService.deleteBiciusuario(identificacion);
-        if(bcDeleted == null){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(bcDeleted);
-    }
-
-    @PutMapping
-    public ResponseEntity<Biciusuario> updateBiciusuario(@RequestBody BiciusuarioDTO bcDto){
-        Long identificacion = bcDto.getIdentificacion();
-        String nombre = bcDto.getNombre();
-        String apellido = bcDto.getApellido();
-        String correo = bcDto.getCorreo();
-
-        Biciusuario bc = bcService.updateBiciusuario(identificacion, nombre, apellido, correo);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Biciusuario> deleteBiciusuario(@PathVariable("id") Long id){
+        Biciusuario bc = bcService.getBiciusuario(id);
         if(bc == null){
             return ResponseEntity.notFound().build();
         }
+        bcService.deleteBiciusuario(id);
         return ResponseEntity.ok(bc);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<Biciusuario> updateBiciusuario(@RequestBody BiciusuarioDTO bcDto){
+        Biciusuario bcUpdated = bcService.getBiciusuario(bcDto.getId());
+        if(bcUpdated == null){
+            return ResponseEntity.notFound().build();
+        }
+        bcUpdated.setUserName(bcDto.getUserName());
+        bcUpdated.setCorreo(bcDto.getCorreo());
+        bcUpdated.setTelefono(bcDto.getTelefono());
+        bcUpdated.setContrasena(bcDto.getContrasena());
+        bcUpdated = bcService.updateBiciusuario(bcUpdated);
+        return ResponseEntity.ok(bcUpdated);
     }
 
 }
