@@ -1,52 +1,34 @@
 package com.bicisafe.demo.web.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@Getter
+@Setter
 public class BiciusuarioDTO {
     private Long id;
     private String correo;
-    private String UserName;
+    private String userName;
     private String contrasena;
     private Long telefono;
-    
 
-    public Long getId() {
-        return this.id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCorreo() {
-        return this.correo;
-    }
-
-    public void setCorreo(String correo) {
+    public BiciusuarioDTO(String correo, String userName, String contrasena, Long telefono) {
         this.correo = correo;
+        this.userName = userName;
+        this.contrasena = contrasena;
+        this.telefono = telefono;
     }
-
-    public String getUserName() {
-        return this.UserName;
-    }
-
-    public void setUserName(String UserName) {
-        this.UserName = UserName;
-    }
-
-    public String getContrasena() {
-        return this.contrasena;
-    }
-
-    public void setContrasena(String contrasena) {
+        
+    public BiciusuarioDTO(String correo, String contrasena){
+        this.correo = correo;
         this.contrasena = contrasena;
     }
 
-    public Long getTelefono() {
-        return this.telefono;
+    public BiciusuarioDTO(String correo){
+        this.correo = correo;
     }
-
-    public void setTelefono(Long telefono) {
-        this.telefono = telefono;
-    }
-
 
 }

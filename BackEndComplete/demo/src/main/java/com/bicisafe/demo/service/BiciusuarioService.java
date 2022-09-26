@@ -11,6 +11,10 @@ public interface BiciusuarioService {
     public Biciusuario deleteBiciusuario(Long id);
     public Biciusuario updateBiciusuario(Biciusuario bc);
 
-    public List<Biciusuario> findAllByCorreoAndContrasena(String correo, String contrasena);
+    public Biciusuario findByCorreoAndContrasena(String correo, String contrasena);
+    public Biciusuario findByCorreo(String correo);
+    public Biciusuario findByUserName(String UserName);
+
     public List<Biciusuario> findAll();
+    //public List<Biciusuario> findAllId();
 }

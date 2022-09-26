@@ -16,7 +16,7 @@ public class Biciusuario {
     @Column(name = "correo", unique = true, nullable = false)
     private String correo;
     @Column(name = "UserName", unique = true, nullable = false)
-    private String UserName;
+    private String userName;
     @Column(name = "contrasena", nullable = false)
     private String contrasena;
     @Column(name = "telefono")
@@ -25,10 +25,9 @@ public class Biciusuario {
 
     public Biciusuario(String correo, String UserName, String contrasena, Long telefono) {
         this.correo = correo;
-        this.UserName = UserName;
+        this.userName = UserName;
         this.contrasena = contrasena;
         this.telefono = telefono;
     }
     
-
 }

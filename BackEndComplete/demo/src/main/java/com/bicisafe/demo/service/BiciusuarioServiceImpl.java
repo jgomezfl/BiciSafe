@@ -41,7 +41,7 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
 
     @Override
     public Biciusuario updateBiciusuario(Biciusuario bc) {
-        Biciusuario bcTemp = bcRepository.findById(bc.getId()).orElse(null);
+        Biciusuario bcTemp = bcRepository.findByCorreo(bc.getCorreo());
         if(bcTemp == null){
             return null;
         }
@@ -49,8 +49,9 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public List<Biciusuario> findAllByCorreoAndContrasena(String correo, String contrasena) {
-        return bcRepository.findAllByCorreoAndContrasena(correo, contrasena);
+    public Biciusuario findByCorreoAndContrasena(String correo, String contrasena) {
+        Biciusuario bc = bcRepository.findByCorreoAndContrasena(correo, contrasena);
+        return bc;
     }
 
     @Override
@@ -58,6 +59,23 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
         return bcRepository.findAll();
     }
 
-    
+    @Override
+    public Biciusuario findByCorreo(String correo) {
+        Biciusuario bc = bcRepository.findByCorreo(correo);
+        return bc;
+    }
+
+    @Override
+    public Biciusuario findByUserName(String UserName) {
+        Biciusuario bc = bcRepository.findByUserName(UserName);
+        return bc;
+    }
+
+    // @Override
+    // public List<Biciusuario> findAllId() {
+    //     return bcRepository.findAll();
+    // }
+
+        
 
 }

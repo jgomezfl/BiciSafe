@@ -1,10 +1,11 @@
 package com.bicisafe.demo.web.controller;
 
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +20,9 @@ import com.bicisafe.demo.model.Biciusuario;
 import com.bicisafe.demo.service.BiciusuarioService;
 import com.bicisafe.demo.web.dto.BiciusuarioDTO;
 
-import net.bytebuddy.asm.Advice.Return;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/biciusuarios")
 public class BiciusuarioController {
     
@@ -38,6 +39,16 @@ public class BiciusuarioController {
         if(bc == null){
             return ResponseEntity.notFound().build();
         }
+        bc.setContrasena("");
+        return ResponseEntity.ok(bc);
+    }
+
+    @GetMapping("/select/register")
+    public ResponseEntity<Biciusuario> getBiciusuarioByCorreo(@RequestBody BiciusuarioDTO bcDto){
+        Biciusuario bc = bcService.findByCorreo(bcDto.getCorreo());
+        if(bc == null){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(bc);
     }
 
@@ -50,16 +61,59 @@ public class BiciusuarioController {
         return ResponseEntity.ok(Listbc);
     }
 
+    @GetMapping("/select/login")
+    public String getLogin(@RequestParam(name = "correo") String correo, @RequestParam(name = "contrasena") String contrasena){
+        Biciusuario bc = bcService.findByCorreo(correo);
+        if(bc == null){
+            return null;
+        }
+        bc =  bcService.findByCorreoAndContrasena(correo, contrasena);
+        if(bc == null){
+            return null;
+        }
+        return correo+" "+contrasena;
+    }
+
     @PostMapping("/save")
-    public ResponseEntity<Biciusuario> createBiciusuario(@RequestBody BiciusuarioDTO bcDto){
-        Biciusuario bc = new Biciusuario(
+    public String createBiciusuario(@RequestBody BiciusuarioDTO bcDto){
+
+        Biciusuario bc = bcService.findByCorreo(bcDto.getCorreo());
+        if(bc != null){
+            return "Correo ya Registrado";
+        }
+        bc = bcService.findByUserName(bcDto.getUserName());
+        if(bc != null){
+            return "User Name ya registrado";
+        }
+        bc = new Biciusuario(
             bcDto.getCorreo(),
             bcDto.getUserName(),
             bcDto.getContrasena(),
             bcDto.getTelefono()
         );
-        Biciusuario createdBc = bcService.createBiciusuario(bc);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdBc);
+        bcService.createBiciusuario(bc);
+        return "Succesfull";
+    }
+
+    @PostMapping("/save/login")
+    public ResponseEntity<Biciusuario> LogicaLogin(@RequestBody BiciusuarioDTO bcDto){
+        Biciusuario bc = bcService.findByCorreoAndContrasena(bcDto.getCorreo(), bcDto.getContrasena());
+        if(bc == null){
+            return ResponseEntity.ok(null);
+        }
+        bc.setContrasena("");
+        return ResponseEntity.ok(bc);
+
+    }
+
+    @PostMapping("/save/correo")
+    public ResponseEntity<Biciusuario> getByCorreo(@RequestBody BiciusuarioDTO bcDto){
+        Biciusuario bc = bcService.findByCorreo(bcDto.getCorreo());
+        if(bc == null){
+            return ResponseEntity.ok(null);
+        }
+        bc.setContrasena("");
+        return ResponseEntity.ok(bc);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -74,7 +128,7 @@ public class BiciusuarioController {
 
     @PutMapping("/update")
     public ResponseEntity<Biciusuario> updateBiciusuario(@RequestBody BiciusuarioDTO bcDto){
-        Biciusuario bcUpdated = bcService.getBiciusuario(bcDto.getId());
+        Biciusuario bcUpdated = bcService.findByCorreoAndContrasena(bcDto.getCorreo(), bcDto.getContrasena());
         if(bcUpdated == null){
             return ResponseEntity.notFound().build();
         }
@@ -83,6 +137,20 @@ public class BiciusuarioController {
         bcUpdated.setTelefono(bcDto.getTelefono());
         bcUpdated.setContrasena(bcDto.getContrasena());
         bcUpdated = bcService.updateBiciusuario(bcUpdated);
+        return ResponseEntity.ok(bcUpdated);
+    }
+
+    @PutMapping("/update/password")
+    public ResponseEntity<Biciusuario> updateBiciusuarioPassword(@RequestBody BiciusuarioDTO bcDto){
+        Biciusuario bcUpdated = bcService.findByCorreo(bcDto.getCorreo());
+        if(bcUpdated == null){
+            return ResponseEntity.ok(null);
+            //return "no lo encontró";
+        }
+        bcUpdated.setContrasena(bcDto.getContrasena());
+        bcService.updateBiciusuario(bcUpdated);
+        //return "cambió la contraseña";
+        bcUpdated.setContrasena("");
         return ResponseEntity.ok(bcUpdated);
     }
 

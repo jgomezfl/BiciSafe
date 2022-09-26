@@ -10,7 +10,10 @@ import com.bicisafe.demo.model.Biciusuario;
 @Repository
 public interface biciusuarioRepository extends JpaRepository<Biciusuario, Long> {
 
-    public List<Biciusuario> findAllByCorreoAndContrasena(String correo, String contrasena);
+    public Biciusuario findByCorreoAndContrasena(String correo, String contrasena);
+    public Biciusuario findByCorreo(String correo);
+    public Biciusuario findByUserName(String UserName);
 
     public List<Biciusuario> findAll();
+    //public List<Biciusuario> findAllId();
 }
