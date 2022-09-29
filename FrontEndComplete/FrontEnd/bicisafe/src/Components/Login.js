@@ -95,11 +95,11 @@ const Login = () => {
                                 setMessage("Código de confirmación enviado");
                                 setSucces(true);
 
-                                API.post("/sendMail", {recipient: "johnf.gomezf@gmail.com", msgBody: "El código de recuperación es: 1234", subject:"Código de recuperación de contraseña"}).then(response => {
-                                    console.log(response);
-                                }).catch(error => {
-                                    console.log(error.response);
-                                });
+                                // API.post("/sendMail", {recipient: "johnf.gomezf@gmail.com", msgBody: "El código de recuperación es: 1234", subject:"Código de recuperación de contraseña"}).then(response => {
+                                //     console.log(response);
+                                // }).catch(error => {
+                                //     console.log(error.response);
+                                // });
                             }else{
                                 console.log(null);
                             }
