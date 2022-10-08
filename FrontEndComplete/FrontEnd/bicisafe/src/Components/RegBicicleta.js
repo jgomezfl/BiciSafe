@@ -15,3 +15,8 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 
 import { InstantMessage } from "../Helpers/Alertas";
+
+let validationSchema = Yup.object().shape({
+    serie: Yup.string().required("Número de serie es requerido"),
+    
+})
