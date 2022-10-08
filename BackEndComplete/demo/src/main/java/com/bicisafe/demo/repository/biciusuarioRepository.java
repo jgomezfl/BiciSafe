@@ -13,6 +13,7 @@ public interface biciusuarioRepository extends JpaRepository<Biciusuario, Long> 
     public Biciusuario findByCorreoAndContrasena(String correo, String contrasena);
     public Biciusuario findByCorreo(String correo);
     public Biciusuario findByUserName(String UserName);
+    public Biciusuario findByIdent(Long ident);
 
     public List<Biciusuario> findAll();
     //public List<Biciusuario> findAllId();

@@ -71,11 +71,10 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
         return bc;
     }
 
-    // @Override
-    // public List<Biciusuario> findAllId() {
-    //     return bcRepository.findAll();
-    // }
-
-        
+    @Override
+    public Biciusuario findByIdent(Long ident) {
+        Biciusuario bc = bcRepository.findByIdent(ident);
+        return bc;
+    }   
 
 }

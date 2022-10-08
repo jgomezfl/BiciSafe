@@ -85,12 +85,14 @@ public class BiciusuarioController {
         if(bc != null){
             return "User Name ya registrado";
         }
-        bc = new Biciusuario(
-            bcDto.getCorreo(),
-            bcDto.getUserName(),
-            bcDto.getContrasena(),
-            bcDto.getTelefono()
-        );
+        bc = new Biciusuario();
+        bc.setIdent(bcDto.getIdent());
+        bc.setCorreo(bcDto.getCorreo());
+        bc.setUserName(bcDto.getUserName());
+        bc.setContrasena(bcDto.getContrasena());
+        bc.setTipo_id(bcDto.getTipo_id());
+        bc.setTelefono(bcDto.getTelefono());
+
         bcService.createBiciusuario(bc);
         return "Succesfull";
     }

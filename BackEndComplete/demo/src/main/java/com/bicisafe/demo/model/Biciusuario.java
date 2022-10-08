@@ -2,32 +2,27 @@ package com.bicisafe.demo.model;
 
 import javax.persistence.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table (name = "biciusuarios")
-@Data @NoArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
 public class Biciusuario {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "ident", unique = true, nullable = false)
+    private Long ident;
     @Column(name = "correo", unique = true, nullable = false)
     private String correo;
     @Column(name = "UserName", unique = true, nullable = false)
     private String userName;
     @Column(name = "contrasena", nullable = false)
     private String contrasena;
+    @Column(name = "tipo_id", nullable = false)
+    private String tipo_id;
     @Column(name = "telefono")
     private Long telefono;
-
-
-    public Biciusuario(String correo, String UserName, String contrasena, Long telefono) {
-        this.correo = correo;
-        this.userName = UserName;
-        this.contrasena = contrasena;
-        this.telefono = telefono;
-    }
     
 }
