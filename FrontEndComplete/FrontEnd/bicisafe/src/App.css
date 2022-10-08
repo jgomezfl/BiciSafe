@@ -60,6 +60,18 @@
   justify-content: space-around;
 }
 
+.botones_aplicacion_rojos{
+  background-color: #EC4848;
+  color: #282c34;
+  font-weight: bold;
+  padding-left: 35px;
+  padding-right: 35px;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
 .register-mt{
   margin-top: 7%;
   display: flex;

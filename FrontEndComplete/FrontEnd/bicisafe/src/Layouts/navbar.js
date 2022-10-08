@@ -11,9 +11,9 @@ import { Button, Nav, Navbar, Modal } from 'react-bootstrap';
 import { Container, Row, Col } from "react-bootstrap";
 
 //importamos componentes MUI material
-import { Typography, IconButton, Paper, Popper, MenuItem, ClickAwayListener} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material'; //importamos los iconos de MUI material
-import { OutlinedInput, InputLabel, InputAdornment, FormControl, TextField, MenuList } from '@mui/material'; //importamos lo necesario para el formulario
+import { Typography, IconButton, Paper, Box} from '@mui/material';
+import { Visibility, VisibilityOff, AccountCircle, LogoutOutlined, Add } from '@mui/icons-material'; //importamos los iconos de MUI material
+import { OutlinedInput, InputLabel, InputAdornment, FormControl, TextField } from '@mui/material'; //importamos lo necesario para el formulario
 
 //importamos componentes de validación de forms
 import { Formik } from "formik";
@@ -25,7 +25,7 @@ import Cookies from "universal-cookie";
 //importamos alertas
 import { SuccessMessage, InstantMessage } from "../Helpers/Alertas";
 
-import { Outlet, Link, useNavigate} from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -61,20 +61,21 @@ const NavbarExample = () => {
     const handleOpenLoginModal = () => setShowModalLogin(true);
     const handleCloseLoginModal = () => setShowModalLogin(false);
 
-    //show popper loggout
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [open, setOpen] = useState(false);
-    const handleOpenPopper = (event) => {
-        if(loggeado !== undefined){
-            setAnchorEl(anchorEl ? null : event.currentTarget);
-            setOpen(true);
-        } else{
+    //show modal Menu
+    const [showModalMenu, setShowModalMenu] = useState(false);
+    const handleOpenModalMenu = () => setShowModalMenu(true);
+    const handleCloseModalMenu = ()  => setShowModalMenu(false);
+
+    //show modals
+    const handleShowModals = () => {
+        if(loggeado === undefined){
             handleOpenLoginModal();
-        }  
-    };
-    const handleClosePopper = () => {
-        setAnchorEl(null);
-        setOpen(false);
+        }
+        else{
+            var bc = cookie.get("bcusuario");
+            console.log(bc);
+            handleOpenModalMenu();
+        }
     }
 
     const handleShowPassword = () =>{
@@ -82,6 +83,7 @@ const NavbarExample = () => {
     };
     const handleDontShowPassword = (event) =>{
         event.preventDefault();
+        setShowPassword(false);
     };
 
     function changeBackground(e){
@@ -98,7 +100,7 @@ const NavbarExample = () => {
         cookie.remove("logged", { path: '/' });
         cookie.remove("bcusuario", { path: '/' });
 
-        handleClosePopper();
+        handleCloseModalMenu();
     }
 
     return (
@@ -117,23 +119,49 @@ const NavbarExample = () => {
                 </Nav.Link>
 
                 <Nav.Link onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
-                    <FiUser onClick={handleOpenPopper} style={fontStyles} /> 
+                    <FiUser onClick={handleShowModals} style={fontStyles} /> 
                 </Nav.Link>
-
-                <Popper open={open} anchorEl={anchorEl}>
-                    <Paper>
-                        <ClickAwayListener onClickAway={handleClosePopper}>
-                            <MenuList autoFocusItem={open}>
-                                <MenuItem onClick={cerrarSesion}>Cerrar Sesión</MenuItem>
-                            </MenuList>
-                        </ClickAwayListener>
-                    </Paper>
-                </Popper>
 
                 {succes ? <SuccessMessage message = {message}/> : `` }
                 {error ? <InstantMessage message = {message}/> : `` }
 
             </Navbar>
+
+            <Modal show={showModalMenu} onHide={handleCloseModalMenu}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Menu</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="d-flex">
+                        <AccountCircle sx={{ fontSize: 80 }}/>
+                        <div className="ms-5">
+                            <h1> {(biciusuario !== undefined) ? biciusuario.userName : ''} </h1>
+                            <p> { (biciusuario !== undefined) ? biciusuario.correo : ''} </p>
+                        </div>
+                        <Paper>
+                            <Box>
+
+                            </Box>
+                        </Paper>
+                    </div>
+                    <br/>
+                    <div className="d-flex justify-content-around">
+                        <Button className="botones_aplicacion" size="small" onClick={cerrarSesion}>
+                            Añadir Bicicleta
+                            <IconButton aria-label="LogOut">
+                                <Add sx={{ color: "#262626" }}/>
+                            </IconButton>
+                        </Button>
+                        <Button className="botones_aplicacion_rojos" size="small" onClick={cerrarSesion}>
+                            Cerrar Sesión
+                            <IconButton aria-label="LogOut">
+                                <LogoutOutlined sx={{ color: "#262626" }}/>
+                            </IconButton>
+                        </Button>
+                    </div>
+
+                </Modal.Body>
+            </Modal>
 
             <Modal show={showModalLogin} onHide={handleCloseLoginModal}>
                 <Modal.Header closeButton>
@@ -144,7 +172,7 @@ const NavbarExample = () => {
                         initialValues={{correo:"", contrasena:""}}
                         onSubmit={async (values) => {
                             var cookie = new Cookies();
-                            API.post("/save/login", values).then(({data}) => {
+                            API.post("/biciusuarios/save/login", values).then(({data}) => {
                                 if(Boolean(data)){
                                     setBiciusuario(data);
                                     SetLoggeado(true);

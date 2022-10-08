@@ -4,10 +4,10 @@ import * as React from "react";
 import { Container, Button, Nav} from "react-bootstrap";
 
 //componentes de MUI
-import { Card, CardActions, CardHeader, CardContent } from '@mui/material'; //importamos todo de las cartas
+import { Card, CardActions, CardHeader, CardContent, MenuItem } from '@mui/material'; //importamos todo de las cartas
 import { Typography, IconButton, Paper} from '@mui/material';
 import { Save, Cancel, PedalBike, Visibility, VisibilityOff} from '@mui/icons-material'; //importamos los iconos de MUI material
-import { Box, OutlinedInput, InputLabel, InputAdornment, FormControl, TextField } from '@mui/material'; //importamos lo necesario para el formulario
+import { Box, OutlinedInput, InputLabel, InputAdornment, FormControl, TextField, Select } from '@mui/material'; //importamos lo necesario para el formulario
 
 //API
 import API from "../services/http-common";
@@ -23,6 +23,7 @@ import * as Yup from 'yup';
 import { InstantMessage } from "../Helpers/Alertas";
 
 let validationSchema  = Yup.object().shape({
+    ident: Yup.number('Caractares invalidos digitados').required('Identificación Obligatoria'),
     userName: Yup.string().required('Nombre de usuario es requerido'),
     correo: Yup.string().required('Correo es requerido')
         .email('Email invalido'),
@@ -70,10 +71,10 @@ const Register = () => {
     return (
         <>
             <Formik
-                initialValues={{ userName:"", correo:"", telefono:3, contrasena:"", conf_contrasena:"" }}
+                initialValues={{ tipo_id:"", ident:null ,userName:"", correo:"", telefono:null, contrasena:"", conf_contrasena:"" }}
                 onSubmit={(values) => {
 
-                    API.post("/save", values).then(({data}) => {
+                    API.post("/biciusuarios/save", values).then(({data}) => {
                         if(data === 'Correo ya Registrado' || data === 'User Name ya registrado'){
                             setMessage(data);
                             setError(true)
@@ -84,7 +85,9 @@ const Register = () => {
                             navigate(("/"));
                         }
                     });
+                    console.log(values);
                     setError(false);
+
                 }}
                 validationSchema = {validationSchema}
             >
@@ -92,7 +95,7 @@ const Register = () => {
 
                 <>
                     <Container className="register-mt">
-                        <Card sx={{ maxWidth: 1000, width: 700 }}>
+                        <Card sx={{ maxWidth: 1000, width: 750 }}>
                             <CardHeader
                                 avatar={
                                     <IconButton aria-label="secondaryIcon">
@@ -106,11 +109,36 @@ const Register = () => {
                                 <Paper>
                                     <Box sx={{display:"flex", flexWrap:'wrap', justifyContent: 'space-around'}}>
                                         <div>
+                                            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
+                                                <InputLabel>Tipo de Identificación</InputLabel>
+                                                <Select
+                                                 required
+                                                 label="Tipo de Identificación"
+                                                 onChange={handleChange('tipo_id')}>
+                                                    <MenuItem value={"CC"}>Cedula de Ciudadania</MenuItem>
+                                                    <MenuItem value={"TI"}>Tarjeta de Identidad</MenuItem>
+                                                    <MenuItem value={"PP"}>Pasaporte</MenuItem>
+                                                 </Select>
+                                            </FormControl>
+                                        </div>
+                                        <div>
+                                            <TextField
+                                             required
+                                             label="Identificación"
+                                             onChange={handleChange('ident')}
+                                             error={errors.ident ? true : false}
+                                             sx={{ m: 1, width: '25ch' }}
+                                            />
+                                            <Typography variant="inherit" color="textSecondary">
+                                                {errors.ident}
+                                            </Typography>
+                                        </div>
+                                        <div>
                                             <TextField
                                              required
                                              label="User Name"
                                              onChange={handleChange('userName')}
-                                             error={errors.UserName ? true : false}
+                                             error={errors.userName ? true : false}
                                              sx={{ m: 1, width: '25ch' }}
                                             />
                                             <Typography variant="inherit" color="textSecondary">

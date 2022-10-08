@@ -86,8 +86,8 @@ const Login = () => {
                     if(!state1){
                         var dict = {correo: values.correo};
                         var randomGeneratedNumber = Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9)+""+Math.floor(Math.random() * 9);
-                        var msg = {recipient: "johnf.gomezf@gmail.com", msgBody: "El código de recuperación es: 1234", subject:"Código de recuperación de contraseña"}
-                        API.post("/save/correo", dict).then(({data}) => {
+                        var msg = {recipient: values.correo, msgBody: "El código de recuperación es: "+randomGeneratedNumber, subject:"Código de recuperación de contraseña"}
+                        API.post("/biciusuarios/save/correo", dict).then(({data}) => {
                             if(Boolean(data)){
                                 setCuenta(data);
                                 setState1(true);
@@ -95,11 +95,11 @@ const Login = () => {
                                 setMessage("Código de confirmación enviado");
                                 setSucces(true);
 
-                                // API.post("/sendMail", {recipient: "johnf.gomezf@gmail.com", msgBody: "El código de recuperación es: 1234", subject:"Código de recuperación de contraseña"}).then(response => {
-                                //     console.log(response);
-                                // }).catch(error => {
-                                //     console.log(error.response);
-                                // });
+                                API.post("/sendMail", msg).then(response => {
+                                    console.log(response);
+                                }).catch(error => {
+                                    console.log(error.response);
+                                });
                             }else{
                                 console.log(null);
                             }
@@ -115,11 +115,13 @@ const Login = () => {
                         else{
                             setMessage("Código de seguridad incorrecto");
                             setError(true);
-                            console.log("que pendejo");
                         }
                     } else {
-                        API.put("/update/password",{correo: values.correo, contrasena: values.contrasena}).then(({data}) => {
-                            console.log(data);
+                        API.put("/biciusuarios/update/password",{correo: values.correo, contrasena: values.contrasena}).then(({data}) => {
+                            // console.log(data);
+                            navigate(("/"));
+                        }).catch(error => {
+                            console.log(error.response);
                         });
                     }
                     setTimeout(function(){
@@ -227,7 +229,7 @@ const Login = () => {
                                     </Box>
                                     <CardActions sx={{ display: 'flex', justifyContent: 'space-around', flexWrap:'wrap', marginTop:'20px' }}>
                                         <Button className="botones_aplicacion" size="small" onClick={handleSubmit}>
-                                            REGISTRAR
+                                            CONTINUAR
                                             <IconButton aria-label="save">
                                                 <Save/>
                                             </IconButton>
