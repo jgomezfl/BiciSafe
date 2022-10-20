@@ -7,6 +7,7 @@ import NavBarExample from './Layouts/navbar';
 import MapView  from './Components/MapView';
 import Login from './Components/Login';
 import Register from './Components/Register';
+import RegBicicleta from './Components/RegBicicleta';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route index element={<MapView/>} />
             <Route path='login' element={<Login/>} />
             <Route path='register' element={<Register/>} />
+            <Route path='regBicicleta' element={<RegBicicleta/>} />
 
             <Route path='*' element={<Navigate replace to="/" />} />
           </Route>
