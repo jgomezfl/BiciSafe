@@ -12,8 +12,9 @@ import { Container, Row, Col } from "react-bootstrap";
 
 //importamos componentes MUI material
 import { Typography, IconButton, Paper, Box} from '@mui/material';
-import { Visibility, VisibilityOff, AccountCircle, LogoutOutlined, Add } from '@mui/icons-material'; //importamos los iconos de MUI material
+import { Visibility, VisibilityOff, AccountCircle, LogoutOutlined, Report, Delete,Add, PedalBike } from '@mui/icons-material'; //importamos los iconos de MUI material
 import { OutlinedInput, InputLabel, InputAdornment, FormControl, TextField } from '@mui/material'; //importamos lo necesario para el formulario
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 
 //importamos componentes de validación de forms
 import { Formik } from "formik";
@@ -48,8 +49,22 @@ const NavbarExample = () => {
     const [biciusuario, setBiciusuario] = useState(cookie.get("bcusuario"));
     //guardamos el estado (true o false)
     const [loggeado, SetLoggeado] = useState(cookie.get("logged"));
+    //serie de la bicicleta
+    const [serie, setSerie] = useState(null);
+    //guardamos las bicicletas
+    const [bicicletas, setBicicletas] = useState(cookie.get("bicicletas"));
     //constantes booleanas para mostrar el password
     const [showPassword, setShowPassword] = useState(false);
+
+    //Dialogo de eliminación
+    const [openDialog, setOpenDialog] = React.useState(false);
+    const handleOpenDialog = () => { setOpenDialog(true); };
+    const handleCloseDialog = () => { setOpenDialog(false); setSerie(null); };
+
+    //Dialogo de reporte
+    const [openDialogReporte, setOpenDialogReporte] = React.useState(false);
+    const handleOpenDialogReporte = () => { setOpenDialogReporte(true); };
+    const handleCloseDialogReporte = () => { setOpenDialogReporte(false); };
 
     //mensaje de las alertas
     const [message, setMessage] = React.useState('');
@@ -63,7 +78,9 @@ const NavbarExample = () => {
 
     //show modal Menu
     const [showModalMenu, setShowModalMenu] = useState(false);
-    const handleOpenModalMenu = () => setShowModalMenu(true);
+    const handleOpenModalMenu = () => {
+        setShowModalMenu(true)
+    };
     const handleCloseModalMenu = ()  => setShowModalMenu(false);
 
     //show modals
@@ -72,8 +89,7 @@ const NavbarExample = () => {
             handleOpenLoginModal();
         }
         else{
-            var bc = cookie.get("bcusuario");
-            console.log(bc);
+            setBicicletas(cookie.get("bicicletas"));
             handleOpenModalMenu();
         }
     }
@@ -97,10 +113,32 @@ const NavbarExample = () => {
     function cerrarSesion(){
         SetLoggeado(undefined);
         setBiciusuario(undefined);
+        setBicicletas(undefined);
+
         cookie.remove("logged", { path: '/' });
         cookie.remove("bcusuario", { path: '/' });
+        cookie.remove("bicicletas", { path: '/' });
 
         handleCloseModalMenu();
+    }
+
+    function borrarBicicleta(){
+        console.log(serie);
+        var aux = [];
+        for (var i in bicicletas){
+            if(bicicletas[i].serie !== serie){
+                aux.push(bicicletas[i]);
+            }
+        }
+        setBicicletas(aux);
+        cookie.remove("bicicletas", { path: '/' });
+        cookie.set("bicicletas", aux, {path: '/'});
+
+        var path = "/bicicletas/delete/"+serie;
+        API.delete(path).then(({data}) =>{
+            console.log(data);
+        })
+        handleCloseDialog();
     }
 
     return (
@@ -127,6 +165,28 @@ const NavbarExample = () => {
 
             </Navbar>
 
+            <Dialog
+             open={openDialog}
+             onClose={handleCloseDialog}
+             aria-labelledby="alert-dialog-title"
+             aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title">{"¿Deseas Eliminar esta bicicleta?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Por favor confirma en caso de realmente querer eliminar la bicicleta, de otra forma
+                        solo cancela la solicitud.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={borrarBicicleta} className="btn btn-danger">
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Modal show={showModalMenu} onHide={handleCloseModalMenu}>
                 <Modal.Header closeButton>
                     <Modal.Title>Menu</Modal.Title>
@@ -138,20 +198,49 @@ const NavbarExample = () => {
                             <h1> {(biciusuario !== undefined) ? biciusuario.userName : ''} </h1>
                             <p> { (biciusuario !== undefined) ? biciusuario.correo : ''} </p>
                         </div>
-                        <Paper>
-                            <Box>
-
-                            </Box>
-                        </Paper>
                     </div>
+                    <Paper className="ps-1 pe-1
+                    " sx={{maxHeight: '200px', overflow: 'auto', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em'}}>
+                        { 
+                        Boolean(bicicletas) ?
+                            bicicletas.map((bicicleta) =>
+                                <Box className="align-items-center mt-1 mb-1" sx={{display:"flex", justifyContent: 'space-between', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em', borderRadius: '12px' }}>
+                                    <div className="ms-3">
+                                        <PedalBike sx={{fontSize: 32}}/>
+                                    </div>
+                                    <div className="mt-2 mb-2">
+                                        <p className="mb-0 fw-bold">{bicicleta.modelo}</p>
+                                        <p className="mt-0 mb-0">{bicicleta.color}</p>
+                                    </div>
+                                    <div className="d-flex me-3">
+                                        <IconButton><Report sx={{ fontSize: 20 }}/></IconButton>
+                                        <IconButton className="ms-1" onClick={ () => {handleOpenDialog(); setSerie(bicicleta.serie); }}><Delete sx={{ fontSize: 20, color: "#A75858" }}/></IconButton>
+                                    </div>
+                                </Box>
+                            )
+                                
+                        : 
+                            <Box  className="align-items-center mt-1 mb-1" sx={{display:"flex", justifyContent: 'space-between', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em', borderRadius: '12px' }}>
+                                <div className="ms-3">
+                                    <PedalBike sx={{fontSize: 32}}/>
+                                </div>
+                                <div className="mt-2 mb-2">
+                                    <p className="mb-0 fw-bold">No has registrado ninguna bicicleta</p>
+                                </div>
+                                <div></div>
+                            </Box>
+                        }
+                    </Paper>
                     <br/>
                     <div className="d-flex justify-content-around">
-                        <Button className="botones_aplicacion" size="small" onClick={cerrarSesion}>
-                            Añadir Bicicleta
-                            <IconButton aria-label="LogOut">
-                                <Add sx={{ color: "#262626" }}/>
-                            </IconButton>
-                        </Button>
+                        <Nav.Link as={Link} to="/regBicicleta">
+                            <Button className="botones_aplicacion" size="small" onClick={handleCloseModalMenu}>
+                                Añadir Bicicleta
+                                <IconButton aria-label="LogOut">
+                                    <Add sx={{ color: "#262626" }}/>
+                                </IconButton>
+                            </Button>
+                        </Nav.Link>
                         <Button className="botones_aplicacion_rojos" size="small" onClick={cerrarSesion}>
                             Cerrar Sesión
                             <IconButton aria-label="LogOut">
@@ -179,7 +268,15 @@ const NavbarExample = () => {
                                     setBiciusuario(data);
                                     handleCloseLoginModal();
                                     cookie.set("logged", true, { path: '/' });
-                                    cookie.set("bcusuario", data, { path: '/' })
+                                    cookie.set("bcusuario", data, { path: '/' });
+
+                                    var path = "/bicicletas/select/all/"+data.ident;
+                                    API.get(path).then(({data}) =>{
+                                        if(Boolean(data)){
+                                            cookie.set("bicicletas", data, {path: '/'});
+                                            setBicicletas(data);
+                                        }
+                                    })
                                     
                                     setMessage("Bienvenido");
                                     setSucces(true);
