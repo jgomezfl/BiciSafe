@@ -53,6 +53,8 @@ const NavbarExample = () => {
     const [serie, setSerie] = useState(null);
     //guardamos las bicicletas
     const [bicicletas, setBicicletas] = useState(cookie.get("bicicletas"));
+    //bivivleta a modificar
+    const [bicicleta, setBicicleta] = useState(null);
     //constantes booleanas para mostrar el password
     const [showPassword, setShowPassword] = useState(false);
 
@@ -61,10 +63,15 @@ const NavbarExample = () => {
     const handleOpenDialog = () => { setOpenDialog(true); };
     const handleCloseDialog = () => { setOpenDialog(false); setSerie(null); };
 
+    //Dialogo de confirmación reporte
+    const [openReportDialog, setOpenReportDialog] = React.useState(false);
+    const handleOpenReportDialog = () => { setOpenReportDialog(true); };
+    const handleCloseReportDialog = () => { setOpenReportDialog(false); };
+
     //Dialogo de reporte
-    const [openDialogReporte, setOpenDialogReporte] = React.useState(false);
-    const handleOpenDialogReporte = () => { setOpenDialogReporte(true); };
-    const handleCloseDialogReporte = () => { setOpenDialogReporte(false); };
+    // const [openDialogReporte, setOpenDialogReporte] = React.useState(false);
+    // const handleOpenDialogReporte = () => { setOpenDialogReporte(true); };
+    // const handleCloseDialogReporte = () => { setOpenDialogReporte(false); };
 
     //mensaje de las alertas
     const [message, setMessage] = React.useState('');
@@ -79,7 +86,8 @@ const NavbarExample = () => {
     //show modal Menu
     const [showModalMenu, setShowModalMenu] = useState(false);
     const handleOpenModalMenu = () => {
-        setShowModalMenu(true)
+        setShowModalMenu(true);
+
     };
     const handleCloseModalMenu = ()  => setShowModalMenu(false);
 
@@ -90,6 +98,7 @@ const NavbarExample = () => {
         }
         else{
             setBicicletas(cookie.get("bicicletas"));
+            console.log(cookie.get("bicicletas"));
             handleOpenModalMenu();
         }
     }
@@ -141,6 +150,32 @@ const NavbarExample = () => {
         handleCloseDialog();
     }
 
+    function reportarBicicleta(){
+        var dict = {
+            serie: bicicleta.serie,
+            ident: biciusuario.ident,
+            tipo: "Stolen"
+        }
+        API.post("/reportes/save",dict).then(({data}) => {
+            console.log(data);
+        })
+        var path = "/bicicletas/update/"+bicicleta.serie;
+        API.put(path).then(({data}) => {
+            console.log(data);
+        })
+        var aux = bicicletas;
+        for(var i in aux){
+            if(aux[i].serie === bicicleta.serie){
+                aux[i].robada = true;
+            }
+        }
+        cookie.remove("bicicletas", { path: '/' });
+        cookie.set("bicicletas", aux, {path: '/'});
+        handleCloseReportDialog();
+        handleCloseModalMenu();
+        setBicicleta(null);
+    }
+
     return (
         <>
             <Navbar className="color-nav d-flex justify-content-around" collapseOnSelect expand="lg" variant="light">
@@ -187,6 +222,28 @@ const NavbarExample = () => {
                 </DialogActions>
             </Dialog>
 
+            <Dialog
+             open={openReportDialog}
+             onClose={handleCloseReportDialog}
+             aria-labelledby="alert-dialog-title"
+             aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title">{"¿Deseas Reportar esta bicicleta?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Por favor confirma en caso de realmente querer reportar la bicicleta como robada, de otra forma
+                        solo cancela la solicitud.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={reportarBicicleta} className="btn btn-danger">
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Modal show={showModalMenu} onHide={handleCloseModalMenu}>
                 <Modal.Header closeButton>
                     <Modal.Title>Menu</Modal.Title>
@@ -204,19 +261,39 @@ const NavbarExample = () => {
                         { 
                         Boolean(bicicletas) ?
                             bicicletas.map((bicicleta) =>
-                                <Box className="align-items-center mt-1 mb-1" sx={{display:"flex", justifyContent: 'space-between', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em', borderRadius: '12px' }}>
+                            <>
+                                {(bicicleta.robada) ? (
+                                <Box className="align-items-center mt-1 mb-1" sx={{ backgroundColor:"#dedad9", color:"#A75858" , display:"flex", justifyContent: 'space-between', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em', borderRadius: '12px' }}>
                                     <div className="ms-3">
-                                        <PedalBike sx={{fontSize: 32}}/>
+                                        <PedalBike sx={{fontSize: 32 }}/>
                                     </div>
                                     <div className="mt-2 mb-2">
                                         <p className="mb-0 fw-bold">{bicicleta.modelo}</p>
                                         <p className="mt-0 mb-0">{bicicleta.color}</p>
                                     </div>
                                     <div className="d-flex me-3">
-                                        <IconButton><Report sx={{ fontSize: 20 }}/></IconButton>
                                         <IconButton className="ms-1" onClick={ () => {handleOpenDialog(); setSerie(bicicleta.serie); }}><Delete sx={{ fontSize: 20, color: "#A75858" }}/></IconButton>
                                     </div>
                                 </Box>
+                                ) : (
+                                <Box className="align-items-center mt-1 mb-1" sx={{ display:"flex", justifyContent: 'space-between', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em', borderRadius: '12px' }}>
+                                    <div className="ms-3">
+                                        <PedalBike sx={{fontSize: 32 }}/>
+                                    </div>
+                                    <div className="mt-2 mb-2">
+                                        <p className="mb-0 fw-bold">{bicicleta.modelo}</p>
+                                        <p className="mt-0 mb-0">{bicicleta.color}</p>
+                                    </div>
+                                    <div className="d-flex me-3">
+                                        <IconButton onClick={() => {
+                                            setBicicleta(bicicleta)
+                                            handleOpenReportDialog();
+                                        }}><Report sx={{ fontSize: 20 }}/></IconButton>
+                                        <IconButton className="ms-1" onClick={ () => {handleOpenDialog(); setSerie(bicicleta.serie); }}><Delete sx={{ fontSize: 20, color: "#A75858" }}/></IconButton>
+                                    </div>
+                                </Box>)}
+                                
+                            </>
                             )
                                 
                         : 
