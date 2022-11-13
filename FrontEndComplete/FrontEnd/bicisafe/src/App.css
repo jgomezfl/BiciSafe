@@ -79,7 +79,30 @@
   justify-content: center;
 }
 
-.leaflet-container{
-  width: 100vw;
-  height: 100vh;
+.map-container {
+  width: 100%;
+  height: 90vh;
+}
+.places-container{
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 250px;
+  border-radius: 20px;
+}
+.location-container{
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  z-index: 10;
+  background-color: #EBF6C0;
+  border: 1px solid #0058F1;
+  border-radius: 50%;
+
+}
+.combobox-input{
+  width: 100%;
+  padding: 0.5rem;
 }
