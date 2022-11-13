@@ -2,10 +2,10 @@ import * as React from "react";
 
 import { Container, Button, Nav } from "react-bootstrap";
 
-import { Card, CardActions, CardHeader, CardContent, MenuItem } from '@mui/material'; //importamos todo de las cartas
+import { Card, CardActions, CardHeader, CardContent } from '@mui/material'; //importamos todo de las cartas
 import { Typography, IconButton, Paper} from '@mui/material';
-import { Save, Cancel, PedalBike, Visibility, VisibilityOff} from '@mui/icons-material'; //importamos los iconos de MUI material
-import { Box, OutlinedInput, InputLabel, InputAdornment, FormControl, TextField, Select } from '@mui/material'; //importamos lo necesario para el formulario
+import { Save, Cancel, PedalBike } from '@mui/icons-material'; //importamos los iconos de MUI material
+import { Box, TextField } from '@mui/material'; //importamos lo necesario para el formulario
 
 import API from "../services/http-common";
 
@@ -34,26 +34,53 @@ const RegBicicleta = () => {
     const [error, setError] = React.useState(false);
     const [message, setMessage] = React.useState('');
     const navigate = useNavigate();
+
+    function enviar_mensaje(ident, serie){
+        var correoRobado = null;
+        var path = "/biciusuarios/select/"+ident
+        API.get(path).then(({data}) => {
+            correoRobado = data.correo
+        })
+        const timeFuntion = setTimeout(() => {
+            var dict = {recipient: correoRobado, msgBody: "Alguien ha intentado registrar la bicicleta: "+serie+" que has reportado como robada"+"\n"+"Contactate con: "+biciusuario.correo, subject:"Hemos encontrado tu bici!!"}
+            API.post("/sendMail", dict).then(response => {
+                console.log(response);
+            }).catch(error => {
+                console.log(error.response);
+            });
+        }, 1000);
+        
+    }
     
     return (
         <>
             <Formik
-             initialValues={{ ident: biciusuario.ident, serie: "", modelo: "", color: "", vendedor: "" }}
+             initialValues={{ ident: biciusuario.ident, serie: "", modelo: "", color: "", vendedor: "", robada: false }}
              onSubmit={(values) => {
                 
                 API.post("/bicicletas/save", values).then(({data}) => {
                     if(data === 'Bicicleta ya registrada'){
                         setMessage(data);
+                        var path = "/reportes/select/robada/"+values.serie
+                        API.get(path).then(({data}) => {
+                            if(data){
+                                setMessage("Bicicleta reportada como robada");
+                                enviar_mensaje(data.ident, data.serie);
+                            }
+                        })
                         setError(true);
                     }
                     else{
                         cookie.remove("bicicletas", { path: '/' });
-                        bicicletas.push(values);
+                        if(bicicletas === undefined){
+                            bicicletas = [values]
+                        } else {
+                            bicicletas.push(values);
+                        }
                         cookie.set("bicicletas", bicicletas, {path: '/'});
                         navigate(("/"));
                     }
                 });
-                console.log(values);
                 setError(false);
              }}
              validationSchema = {validationSchema}
