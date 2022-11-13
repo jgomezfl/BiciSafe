@@ -8,8 +8,10 @@ import MapView  from './Components/MapView';
 import Login from './Components/Login';
 import Register from './Components/Register';
 import RegBicicleta from './Components/RegBicicleta';
+import Ruta from './Components/Ruta';
 
 function App() {
+
   return (
     <div className='App'>
       <BrowserRouter>
@@ -19,6 +21,7 @@ function App() {
             <Route path='login' element={<Login/>} />
             <Route path='register' element={<Register/>} />
             <Route path='regBicicleta' element={<RegBicicleta/>} />
+            <Route path='ruta' element={<Ruta />} />
 
             <Route path='*' element={<Navigate replace to="/" />} />
           </Route>
