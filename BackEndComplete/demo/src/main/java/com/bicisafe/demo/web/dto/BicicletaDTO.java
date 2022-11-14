@@ -16,5 +16,6 @@ public class BicicletaDTO {
     private String modelo;
     private String color;
     private String vendedor;
+    private Boolean robada;
     
 }
