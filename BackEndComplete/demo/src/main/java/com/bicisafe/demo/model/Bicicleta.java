@@ -25,5 +25,7 @@ public class Bicicleta {
     private String color;
     @Column (name = "vendedor", nullable = false)
     private String vendedor;
+    @Column (name = "robada", nullable = false)
+    private boolean robada;
 
 }
