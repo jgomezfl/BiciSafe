@@ -69,6 +69,7 @@ public class BicicletaController {
         bcl.setModelo(bclDto.getModelo());
         bcl.setColor(bclDto.getColor());
         bcl.setVendedor(bclDto.getVendedor());
+        bcl.setRobada(false);
 
         bclService.createBicicleta(bcl);
         return "Succesfull";
@@ -95,7 +96,17 @@ public class BicicletaController {
         bclTemp.setModelo(bclDto.getModelo());
         bclTemp.setColor(bclDto.getColor());
         bclTemp.setVendedor(bclDto.getVendedor());
+        bclTemp.setRobada(bclDto.getRobada());
+        bclTemp = bclService.updateBicicleta(bclTemp);
         return ResponseEntity.ok(bclTemp);
+    }
+    @PutMapping("/update/{serie}")
+    public ResponseEntity<Bicicleta> updateStateBike(@PathVariable("serie") String serie){
+        Bicicleta bcl = bclService.getBicicleta(serie);
+        if(bcl == null){return ResponseEntity.notFound().build();}
+        bcl.setRobada(true);
+        bcl = bclService.updateBicicleta(bcl);
+        return ResponseEntity.ok(bcl);
     }
 
 }
