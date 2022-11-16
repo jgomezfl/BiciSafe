@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 public class Lugar {
     
     @Id
-    // @GeneratedValue ( strategy = GenerationType.IDENTITY )
-    // private Long id;
+    @GeneratedValue ( strategy = GenerationType.IDENTITY )
+    private Long id;
     @Column (name = "ident", nullable = false)
     private Long ident;
     @Column (name = "tipo", nullable = false)
