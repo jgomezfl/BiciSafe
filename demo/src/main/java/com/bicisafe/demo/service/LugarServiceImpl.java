@@ -26,7 +26,7 @@ public class LugarServiceImpl implements LugarService {
 
     @Override
     public Lugar createLugar(Lugar lr) {
-        return lrRepository.save(lr);
+        return lr;
     }
 
     @Override
