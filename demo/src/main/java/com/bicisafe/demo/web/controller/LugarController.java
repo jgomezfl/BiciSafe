@@ -45,15 +45,15 @@ public class LugarController {
     }
 
     @PostMapping("/save")
-    public String createLugar(@RequestBody LugarDTO lrDto){
+    public ResponseEntity<Lugar> createLugar(@RequestBody LugarDTO lrDto){
         Lugar lr = new Lugar();
         lr.setIdent(lrDto.getIdent());
         lr.setLatitud(lrDto.getLatitud());
         lr.setLongitud(lrDto.getLongitud());
         lr.setTipo(lrDto.getTipo());
 
-        lrService.createLugar(lr);
-        return "Succesfull";
+        // lrService.createLugar(lr);
+        return ResponseEntity.ok(lr);
     }
 
     @DeleteMapping("/delete/{id}")
