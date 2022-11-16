@@ -23,7 +23,7 @@ public class Lugar {
     private Long ident;
     @Column (name = "tipo", nullable = false)
     private String tipo;
-    @Column (name = "latitude", nullable = false)
+    @Column (name = "latitud", nullable = false)
     private String latitud;
     @Column (name = "longitud", nullable = false)
     private String longitud;

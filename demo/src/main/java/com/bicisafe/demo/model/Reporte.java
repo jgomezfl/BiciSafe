@@ -19,7 +19,7 @@ public class Reporte {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (name = "serie")
+    @Column (name = "serie", nullable = true)
     private String serie;
     @Column (name = "ident")
     private Long ident;
