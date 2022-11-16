@@ -71,7 +71,7 @@ const Register = () => {
     return (
         <>
             <Formik
-                initialValues={{ tipo_id:"", ident:null ,userName:"", correo:"", telefono:null, contrasena:"", conf_contrasena:"" }}
+                initialValues={{ tipo_id:"", ident:null ,userName:"", correo:"", telefono:0, contrasena:"", conf_contrasena:"" }}
                 onSubmit={(values) => {
 
                     API.post("/biciusuarios/save", values).then(({data}) => {
