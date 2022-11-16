@@ -51,9 +51,8 @@ public class LugarController {
         lr.setLatitud(lrDto.getLatitud());
         lr.setLongitud(lrDto.getLongitud());
         lr.setTipo(lrDto.getTipo());
-
-        // lrService.createLugar(lr);
-        return ResponseEntity.ok(lr);
+        
+        return ResponseEntity.ok(lrService.createLugar(lr));
     }
 
     @DeleteMapping("/delete/{id}")

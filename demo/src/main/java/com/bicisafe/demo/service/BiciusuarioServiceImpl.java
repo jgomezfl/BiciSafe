@@ -26,8 +26,7 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
 
     @Override
     public Biciusuario createBiciusuario(Biciusuario bc) {
-        // return bcRepository.save(bc);
-        return bc;
+        return bcRepository.save(bc);
     }
 
     @Override
