@@ -1,2 +1,0 @@
-# BiciSafe
-repositorio del proyecto
