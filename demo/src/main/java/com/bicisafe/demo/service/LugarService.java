@@ -9,7 +9,7 @@ public interface LugarService {
     public Lugar getLugar(Long id);
     public Lugar createLugar(Lugar lr);
     public Lugar deleteLugar(Long id);
-    // public Lugar updateLugar(Lugar lr);
+    public Lugar updateLugar(Lugar lr);
 
     public List<Lugar> findByIdent(Long ident);
     public List<Lugar> findAll();
