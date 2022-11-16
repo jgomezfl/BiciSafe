@@ -51,14 +51,31 @@ public class ReporteController {
         return ResponseEntity.ok(rpList);
     }
 
-    @PostMapping("/save")
+    @GetMapping("/select/bicicletas/{id}")
+    public ResponseEntity<List<Reporte>> getReportesBicicletas(@PathVariable("id") Long id){
+        List<Reporte> rpList = rpService.findByIdentAndTipo(id, "Stolen");
+        if (rpList == null){ return ResponseEntity.notFound().build(); }
+        return ResponseEntity.ok(rpList);
+    }
+
+    @GetMapping("/select/robada/{serie}")
+    public ResponseEntity<Reporte> getReporteBicicletabySerie(@PathVariable("serie") String serie){
+        Reporte rp = rpService.findBySerie(serie);
+        if(rp == null){ return ResponseEntity.notFound().build(); }
+        return ResponseEntity.ok(rp);
+    }
+
+    @PostMapping("/save") //         /reportes/save
     public String createReporte(@RequestBody ReporteDTO rpDto){
-        Reporte rp  = rpService.getReporte(rpDto.getId());
-        if(rp != null){return "Bicicleta ya registrada";}
+        Reporte rp = null;
+        if(rpDto.getSerie() != null){ rp  = rpService.findBySerie(rpDto.getSerie()); }
+        if(rp != null){return "Bicicleta ya reportada";}
         rp = new Reporte();
         rp.setSerie(rpDto.getSerie());
         rp.setIdent(rpDto.getIdent());
         rp.setTipo(rpDto.getTipo());
+        rp.setLatitud(rpDto.getLatitud());
+        rp.setLongitud(rpDto.getLongitud());
 
         rpService.createReporte(rp);
         return "Success";
@@ -80,6 +97,11 @@ public class ReporteController {
         rp.setSerie(rpDto.getSerie());
         rp.setIdent(rpDto.getIdent());
         rp.setTipo(rpDto.getTipo());
+        rp.setLatitud(rpDto.getLatitud());
+        rp.setLongitud(rpDto.getLongitud());
+        
+        rpService.updateReporte(rp);
         return ResponseEntity.ok(rp);
     }
+
 }

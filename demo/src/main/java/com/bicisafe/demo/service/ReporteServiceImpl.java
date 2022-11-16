@@ -58,5 +58,11 @@ public class ReporteServiceImpl implements ReporteService {
     public List<Reporte> findAll() {
         return rpRepository.findAll();
     }
+
+    @Override
+    public List<Reporte> findByIdentAndTipo(Long ident, String tipo) {
+        List<Reporte> rp = rpRepository.findByIdentAndTipo(ident, tipo);
+        return rp;
+    }
     
 }

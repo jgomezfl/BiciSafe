@@ -16,6 +16,7 @@ public interface ReporteService {
 
     public Reporte findBySerie(String serie);
 
+    public List<Reporte> findByIdentAndTipo(Long ident, String tipo);
     public List<Reporte> findByIdent(Long ident);
     public List<Reporte> findAll();
     

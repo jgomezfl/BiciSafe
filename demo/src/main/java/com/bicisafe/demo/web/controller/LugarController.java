@@ -31,10 +31,10 @@ public class LugarController {
     }
 
     @GetMapping("/select/{id}")
-    public ResponseEntity<Lugar> getLugar(@PathVariable("id") Long id){
-        Lugar lr = lrService.getLugar(id);
-        if(lr == null){return ResponseEntity.notFound().build();}
-        return  ResponseEntity.ok(lr);
+    public ResponseEntity<List<Lugar>> getLugar(@PathVariable("id") Long id){
+        List<Lugar> lrList = lrService.findByIdent(id);
+        if(lrList.isEmpty()){return ResponseEntity.notFound().build();}
+        return  ResponseEntity.ok(lrList);
     }
     
     @GetMapping("/select/all")
@@ -70,7 +70,6 @@ public class LugarController {
         if(lr  == null){ResponseEntity.notFound().build();}
         lr = new Lugar();
         if(lrDto.getTipo() != null){lr.setTipo(lrDto.getTipo());}
-        if(lrDto.getNombre() != null){lr.setNombre(lrDto.getNombre());}
 
         return ResponseEntity.ok(lr);
     }

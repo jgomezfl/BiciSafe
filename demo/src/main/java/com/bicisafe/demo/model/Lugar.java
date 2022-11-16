@@ -27,7 +27,5 @@ public class Lugar {
     private String latitud;
     @Column (name = "longitud", nullable = false)
     private String longitud;
-    @Column (name = "nombre", nullable = false)
-    private String nombre;
 
 }

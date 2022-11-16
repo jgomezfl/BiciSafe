@@ -19,10 +19,16 @@ public class Reporte {
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column (name = "serie", nullable = false, unique = true)
+    @Column (name = "serie")
     private String serie;
-    @Column (name = "ident", nullable = false)
+    @Column (name = "ident")
     private Long ident;
     @Column (name = "tipo", nullable = false)
     private String tipo;
+    @Column (name = "latitud")
+    private String latitud;
+    @Column (name = "longitud")
+    private String longitud;
+
+    
 }

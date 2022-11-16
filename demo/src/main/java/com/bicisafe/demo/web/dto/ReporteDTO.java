@@ -15,5 +15,7 @@ public class ReporteDTO {
     private String serie;
     private Long ident;
     private String tipo;
+    private String latitud;
+    private String longitud;
     
 }

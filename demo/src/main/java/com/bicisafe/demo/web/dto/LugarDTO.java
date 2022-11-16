@@ -16,6 +16,5 @@ public class LugarDTO {
     private String tipo;
     private String latitud;
     private String longitud;
-    private String nombre;
 
 }
