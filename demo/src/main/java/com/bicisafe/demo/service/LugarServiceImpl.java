@@ -39,12 +39,12 @@ public class LugarServiceImpl implements LugarService {
         return lr;
     }
 
-    @Override
-    public Lugar updateLugar(Lugar lr) {
-        Lugar lrTemp = lrRepository.findById(lr.getId()).orElse(null);
-        if(lrTemp == null){return null;}
-        return lrRepository.save(lr);
-    }
+    // @Override
+    // public Lugar updateLugar(Lugar lr) {
+    //     Lugar lrTemp = lrRepository.findById(lr.getId()).orElse(null);
+    //     if(lrTemp == null){return null;}
+    //     return lrRepository.save(lr);
+    // }
 
     @Override
     public List<Lugar> findByIdent(Long ident) {
