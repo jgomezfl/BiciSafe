@@ -52,7 +52,7 @@ public class LugarController {
         lr.setLongitud(lrDto.getLongitud());
         lr.setTipo(lrDto.getTipo());
         
-        return ResponseEntity.ok(lrService.createLugar(lr));
+        return ResponseEntity.ok(lr);
     }
 
     @DeleteMapping("/delete/{id}")
