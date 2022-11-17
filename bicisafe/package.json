@@ -27,7 +27,7 @@
     "npm": "^8.19.2",
     "react": "^17.0.0",
     "react-bootstrap": "2.5.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^17.0.0",
     "react-google-maps": "^9.4.5",
     "react-icons": "^4.4.0",
     "react-native-maps-directions": "^1.9.0",
