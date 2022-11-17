@@ -91,7 +91,7 @@ function Map() {
         setReportes(aux)
       }
     });
-    const intervalReportes = setInterval(() => {
+    setInterval(() => {
       API.get("/reportes/select/all").then(({data}) => {
         if(Boolean(data)){
           var aux = []

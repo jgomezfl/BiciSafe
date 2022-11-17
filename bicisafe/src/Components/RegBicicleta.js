@@ -31,7 +31,6 @@ var cookie = new Cookies();
 const RegBicicleta = () => {
 
     const [biciusuario] = React.useState(cookie.get("bcusuario"));
-    const [bicicletas] = React.useState(cookie.get("bicicletas"));
     const [error, setError] = React.useState(false);
     const [message, setMessage] = React.useState('');
     const navigate = useNavigate();
@@ -43,7 +42,8 @@ const RegBicicleta = () => {
             correoRobado = data.correo
         })
         setTimeout(() => {
-            var dict = {recipient: correoRobado, msgBody: "Alguien ha intentado registrar la bicicleta: "+serie+" que has reportado como robada"+"\n"+"Contactate con: "+biciusuario.correo, subject:"Hemos encontrado tu bici!!"}
+            var mensaje = "Alguien ha intentado registrar la bicicleta: "+serie+" que has reportado como robada"+"\n"+"Contactate con: "+biciusuario.correo
+            var dict = {recipient: correoRobado, msgBody: mensaje, subject:"Hemos encontrado tu bici!!"}
             API.post("/sendMail", dict).then(response => {
                 console.log(response);
             }).catch(error => {
@@ -58,7 +58,6 @@ const RegBicicleta = () => {
             <Formik
              initialValues={{ ident: biciusuario.ident, serie: "", modelo: "", color: "", vendedor: "", robada: false }}
              onSubmit={(values) => {
-                var aux = false;
                 API.post("/bicicletas/save", values).then(({data}) => {
                     if(data === 'Bicicleta ya registrada'){
                         setMessage(data);

@@ -40,7 +40,6 @@ const Login = () => {
     const [succes, setSucces] = React.useState(false);
     const [error, setError] = React.useState(false);
 
-    const [cuenta, setCuenta] = React.useState({});
     const [state1, setState1] = React.useState(false);
     const [state2, setState2] = React.useState(false);
     const [randomCode, setRandomCode] = React.useState("");
@@ -73,10 +72,6 @@ const Login = () => {
         event.preventDefault();
     };
 
-    const mensajeError = async (mensaje) => {
-        
-    }
-
     return (
         <>
             <Formik
@@ -89,7 +84,6 @@ const Login = () => {
                         var msg = {recipient: values.correo, msgBody: "El código de recuperación es: "+randomGeneratedNumber, subject:"Código de recuperación de contraseña"}
                         API.post("/biciusuarios/save/correo", dict).then(({data}) => {
                             if(Boolean(data)){
-                                setCuenta(data);
                                 setState1(true);
                                 setRandomCode(randomGeneratedNumber);
                                 setMessage("Código de confirmación enviado");
