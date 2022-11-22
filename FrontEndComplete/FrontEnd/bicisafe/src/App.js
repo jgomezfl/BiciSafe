@@ -8,6 +8,9 @@ import MapView  from './Components/MapView';
 import Login from './Components/Login';
 import Register from './Components/Register';
 import RegBicicleta from './Components/RegBicicleta';
+import FAQ from './Components/FAQ';
+import InfoLegal from './Components/InfoLegal';
+import InfoBicisafe from './Components/InfoLegal';
 import Ruta from './Components/Ruta';
 
 function App() {
@@ -22,6 +25,9 @@ function App() {
             <Route path='register' element={<Register/>} />
             <Route path='regBicicleta' element={<RegBicicleta/>} />
             <Route path='ruta' element={<Ruta />} />
+            <Route path='preguntasFrecuentes' element={<FAQ />} />
+            <Route path='informacionLegal' element={<InfoLegal />} />
+            <Route path='nosotros' element={<InfoBicisafe />} />
 
             <Route path='*' element={<Navigate replace to="/" />} />
           </Route>

@@ -2,9 +2,10 @@
 //   importante, el nombre de las cookies son "logged" booleano para ver si esta loggeado y "bcusuario" en este guardamoslos datos del usuario sin el password que no se trae de la bd   //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 import React from "react";
+import ReactDOM from "react-dom"
 
 import logo from "./../assets/logo.png";
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiFacebook, FiLinkedin, FiInstagram } from 'react-icons/fi';
 
 //componentes bootstrap
 import { Button, Nav, Navbar, Modal } from 'react-bootstrap';
@@ -28,7 +29,7 @@ import { SuccessMessage, InstantMessage } from "../Helpers/Alertas";
 
 import { Outlet, Link } from "react-router-dom";
 
-import { useState } from "react";
+import { useEffect,useState } from "react";
 
 //importamos API
 import API from "../services/http-common";
@@ -44,6 +45,7 @@ var cookie = new Cookies();
 const NavbarExample = () => {
     //estilo icono
     const fontStyles = {fontSize: '40px'};
+    const iconStyles = { color: "#AFABAB", fontSize: "40px" };
 
     //guardamos los datos del usuario sin el password
     const [biciusuario, setBiciusuario] = useState(cookie.get("bcusuario"));
@@ -91,6 +93,16 @@ const NavbarExample = () => {
     };
     const handleCloseModalMenu = ()  => setShowModalMenu(false);
 
+    //show modal about us 
+    const [showModalAboutUs, setShowModalAboutUs] = useState(false);
+    const handleOpenModalAboutUs = () => {
+        setShowModalAboutUs(true);
+
+    };
+
+    const handleCloseModalAboutUs = ()  => setShowModalAboutUs(false);
+
+
     //show modals
     const handleShowModals = () => {
         if(loggeado === undefined){
@@ -102,6 +114,54 @@ const NavbarExample = () => {
             handleOpenModalMenu();
         }
     }
+
+    const handleShowModalsAboutUs= () => {
+        if(loggeado === undefined){
+            handleOpenLoginModal();
+        }
+        else{
+            handleOpenModalAboutUs();
+        }
+    }
+
+    //Show button paypal
+    const PayPalButton = window.paypal.Buttons.driver("react", { React, ReactDOM });
+
+    const [price, setPrice] = useState(0);
+    const[opcion, setOpcion] = useState(1);
+
+    useEffect(() =>{
+        if(opcion !== "other"){
+            setPrice(opcion);
+        }
+    },[opcion]);
+    
+
+    const changePrice = (e) => {
+        setPrice(e.target.value);
+    }
+
+    const changePriceOption = (e) => {
+        setOpcion(e.target.value);
+    }
+    
+    const createOrder = (data, actions) => {
+        return actions.order.create({
+            purchase_units: [
+            {
+                amount: {
+                value: price,
+                currency: 'USD'
+                },
+            },
+            ],
+        });
+    }
+
+    const onApprove = (data, actions) => {
+        return actions.order.capture(console.log("Pago exitoso"));
+    }
+    
 
     const handleShowPassword = () =>{
         setShowPassword(true);
@@ -179,10 +239,9 @@ const NavbarExample = () => {
     return (
         <>
             <Navbar className="color-nav d-flex justify-content-around" collapseOnSelect expand="lg" variant="light">
-
-                <Nav.Link as={Link} to="/">
+                <Nav.Link as={Link} to="/ ">
                     <img
-                      onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}
+                      onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}onClick={handleShowModalsAboutUs}
                       width="100"
                       height="15%"
                       src={logo}
@@ -447,6 +506,80 @@ const NavbarExample = () => {
                     
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={showModalAboutUs} onHide={handleCloseModalAboutUs}>
+                <Modal.Header closeButton>
+                    <Modal.Title>About Us</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>
+                        <h1 className="text-center"> Colabora con Bicisafe </h1>
+                        <h5 className="text-center"> Estas donando {price} $</h5>
+                    </div>
+                    
+                    <select value={opcion} className="form-control" onChange={changePriceOption}>
+                        <option value="1">1 usd</option>
+                        <option value="3">3 usd</option>
+                        <option value="5">5 usd</option>
+                        <option value="other">Otro valor</option>
+                    </select>
+                    
+                    {opcion === "other" && (
+                        <input type ="text" className="form-control" onChange={changePrice} value={price}></input>
+                    )}
+                    
+                    <br></br>
+                    <div>
+                        <PayPalButton
+                            createOrder={(data, actions) => createOrder(data, actions)}
+                            onApprove={(data, actions) => onApprove(data, actions)}
+                        />
+                    </div> 
+                    
+                     <div class="d-grid gap-3" >
+                        
+                        <Nav.Link as={Link} to="/nosotros" >
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Bicisafe</div>
+                        </Nav.Link>
+
+                        <Nav.Link as={Link} to="/preguntasFrecuentes" >
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Preguntas frecuentes</div>
+                        </Nav.Link>
+                        
+                        <Nav.Link as={Link} to="/informacionLegal">
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Informacion legal</div>
+                        </Nav.Link>
+
+                    </div>
+                    <br></br>
+                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                        <a
+                        className="App-link"
+                        href="https://www.facebook.com/profile.php?id=100087472195351"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiFacebook style={iconStyles} />  
+                        </a>
+                        <a
+                        className="App-link"
+                        href="https://www.linkedin.com/company/bicisafeapp/"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiLinkedin style={iconStyles} />  
+                        </a>
+                        <a
+                        className="App-link"
+                        href="https://www.instagram.com/bicisafeapp/"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiInstagram style={iconStyles} /> 
+                        </a>                    
+                    </div>
+                
+                    
+                </Modal.Body>
+            </Modal>
+
 
             <section>
                 <Outlet></Outlet>
