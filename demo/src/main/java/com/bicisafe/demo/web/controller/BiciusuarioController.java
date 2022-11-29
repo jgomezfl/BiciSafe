@@ -34,7 +34,7 @@ public class BiciusuarioController {
     }
 
     @GetMapping("/select/{id}")
-    public ResponseEntity<Biciusuario> getBiciusuario(@PathVariable("id") Long id){
+    public ResponseEntity<Biciusuario> getBiciusuario(@PathVariable("id") String id){
         Biciusuario bc = bcService.getBiciusuario(id);
         if(bc == null){
             return ResponseEntity.notFound().build();
@@ -119,7 +119,7 @@ public class BiciusuarioController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Biciusuario> deleteBiciusuario(@PathVariable("id") Long id){
+    public ResponseEntity<Biciusuario> deleteBiciusuario(@PathVariable("id") String id){
         Biciusuario bc = bcService.getBiciusuario(id);
         if(bc == null){
             return ResponseEntity.notFound().build();

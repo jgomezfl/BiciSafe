@@ -8,12 +8,12 @@ import org.springframework.stereotype.Repository;
 import com.bicisafe.demo.model.Biciusuario;
 
 @Repository
-public interface biciusuarioRepository extends JpaRepository<Biciusuario, Long> {
+public interface biciusuarioRepository extends JpaRepository<Biciusuario, String> {
 
     public Biciusuario findByCorreoAndContrasena(String correo, String contrasena);
     public Biciusuario findByCorreo(String correo);
     public Biciusuario findByUserName(String UserName);
-    public Biciusuario findByIdent(Long ident);
+    public Biciusuario findByIdent(String ident);
 
     public List<Biciusuario> findAll();
     //public List<Biciusuario> findAllId();

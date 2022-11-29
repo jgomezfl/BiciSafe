@@ -13,7 +13,7 @@ public class Biciusuario {
     
     @Id
     @Column(name = "ident", unique = true, nullable = false)
-    private Long ident;
+    private String ident;
     @Column(name = "correo", unique = true, nullable = false)
     private String correo;
     @Column(name = "UserName", unique = true, nullable = false)

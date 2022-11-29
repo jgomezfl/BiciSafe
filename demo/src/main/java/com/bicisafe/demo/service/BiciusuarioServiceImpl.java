@@ -19,7 +19,7 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public Biciusuario getBiciusuario(Long id) {
+    public Biciusuario getBiciusuario(String id) {
         Biciusuario bc = bcRepository.findById(id).orElse(null);
         return bc;
     }
@@ -30,7 +30,7 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public Biciusuario deleteBiciusuario(Long id) {
+    public Biciusuario deleteBiciusuario(String id) {
         Biciusuario bc = bcRepository.findById(id).orElse(null);
         if(bc == null){
             return null;
@@ -72,7 +72,7 @@ public class BiciusuarioServiceImpl implements BiciusuarioService {
     }
 
     @Override
-    public Biciusuario findByIdent(Long ident) {
+    public Biciusuario findByIdent(String ident) {
         Biciusuario bc = bcRepository.findByIdent(ident);
         return bc;
     }   

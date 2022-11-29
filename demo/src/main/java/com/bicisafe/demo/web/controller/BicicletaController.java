@@ -70,6 +70,7 @@ public class BicicletaController {
         bcl.setColor(bclDto.getColor());
         bcl.setVendedor(bclDto.getVendedor());
         bcl.setRobada(false);
+        bcl.setDescripcion(bclDto.getDescripcion());
 
         bclService.createBicicleta(bcl);
         return "Succesfull";
@@ -97,6 +98,7 @@ public class BicicletaController {
         bclTemp.setColor(bclDto.getColor());
         bclTemp.setVendedor(bclDto.getVendedor());
         bclTemp.setRobada(bclDto.getRobada());
+        bclTemp.setDescripcion(bclDto.getDescripcion());
         bclTemp = bclService.updateBicicleta(bclTemp);
         return ResponseEntity.ok(bclTemp);
     }

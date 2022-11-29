@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class BiciusuarioDTO {
 
-    private Long ident;
+    private String ident;
     private String correo;
     private String userName;
     private String contrasena;
