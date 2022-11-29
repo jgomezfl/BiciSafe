@@ -1,5 +1,7 @@
 package com.bicisafe.demo.web.dto;
 
+import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +17,8 @@ public class ReporteDTO {
     private String serie;
     private Long ident;
     private String tipo;
+    private String descripcion;
+    private Date fechaHora;
     private String latitud;
     private String longitud;
     

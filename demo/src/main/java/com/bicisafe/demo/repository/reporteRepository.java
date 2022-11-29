@@ -13,6 +13,7 @@ public interface reporteRepository extends JpaRepository<Reporte, Long> {
     public Reporte findBySerie(String serie);
 
     public List<Reporte> findByIdentAndTipo(Long ident, String tipo);
+    public List<Reporte> findByTipo(String tipo);
     public List<Reporte> findByIdent(Long ident);
     public List<Reporte> findAll();
 
