@@ -1,4 +1,5 @@
 // Componente informacion legal
+<<<<<<< HEAD
 
 import React from 'react';
 import Footer from '../Layouts/Footer';
@@ -29,6 +30,13 @@ const InfoLegal = () =>{
     return(
         <>
 
+=======
+import React from 'react';
+
+const InfoLegal = () =>{
+    return(
+        <>
+>>>>>>> db28393b3f01f36c50dd748b751b5efb1bbdd9ca
         <br></br>
         <div class="containerLegal">
             <p>Las Condiciones Generales, Aviso Legal, Términos de Uso y Política de Privacidad contenidas en este apartado
@@ -205,6 +213,7 @@ const InfoLegal = () =>{
             personal, o no utilizar el servicio de Bicisafe.
             </p>
         </div>
+<<<<<<< HEAD
         <div className='w-100 d-flex justify-content-around mb-5'>
         {(ruta === "/register") ? (
             <Nav.Link as={Link} to={location.state.ruta}>
@@ -221,6 +230,8 @@ const InfoLegal = () =>{
         <Footer />
         
         
+=======
+>>>>>>> db28393b3f01f36c50dd748b751b5efb1bbdd9ca
         </>
         
 

@@ -20,14 +20,20 @@ main{
 .containerFAQ {
   width: 90vw;
   margin: 5rem auto;
+<<<<<<< HEAD
   margin-bottom: 20px;
+=======
+>>>>>>> db28393b3f01f36c50dd748b751b5efb1bbdd9ca
   background: #EBF6C0;
   border-radius: 0.25rem;
   padding: 2.5rem 2rem; 
   max-width: 920px;
   display: grid;
   gap: 1rem 2rem;
+<<<<<<< HEAD
   border: 1px solid #282c34;
+=======
+>>>>>>> db28393b3f01f36c50dd748b751b5efb1bbdd9ca
 }
 
 .containerLegal {
@@ -39,4 +45,10 @@ main{
   max-width: 920px;
   display: grid;
   /* gap: 1rem 2rem; */
+<<<<<<< HEAD
 }
+=======
+}
+
+
+>>>>>>> db28393b3f01f36c50dd748b751b5efb1bbdd9ca
