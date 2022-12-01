@@ -41,7 +41,7 @@ const FooterFormulario = () => {
                             </Nav.Link>
                             <a
                             className="App-link"
-                            href="https://www.instagram.com/bicisafeapp/"
+                            href="https://drive.google.com/drive/u/1/folders/1HuM58xWa83TZJWZWp-enkubqTFZkdA8B"
                             target={"_blank"}
                             rel="noopener noreferrer">
                                 Manual de Usuario
