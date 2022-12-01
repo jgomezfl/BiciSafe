@@ -26,6 +26,11 @@
 
 .App-link {
   color: #61dafb;
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-right: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 @keyframes App-logo-spin {
@@ -42,6 +47,7 @@
   padding: 0px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+  border: 2px solid #282c34;
 }
 
 .padding-margin{
@@ -81,7 +87,7 @@
 
 .map-container {
   width: 100%;
-  height: 90vh;
+  height: 85vh;
 }
 .places-container{
   position: absolute;
@@ -98,11 +104,35 @@
   right: 10px;
   z-index: 10;
   background-color: #EBF6C0;
-  border: 1px solid #0058F1;
+  border: 2px solid #282c34;
   border-radius: 50%;
-
+}
+.footer-container{
+  background-color: #EBF6C0;
+  width: 100%;
+  border: 2px solid #282c34;
+}
+.footer-container-formularios{
+  position: fixed;
+  margin-top: 1px;
+  bottom: 0px;
+  background-color: #EBF6C0;
+  width: 100%;
+  border: 2px solid #282c34;
 }
 .combobox-input{
   width: 100%;
   padding: 0.5rem;
+}
+.opciones-container{
+  position: absolute;
+  top: 80px;
+  right: 10px;
+  z-index: 10;
+}
+
+.container-nosotros{
+  margin-top: -120px;
+  width: 55%;
+  background-color: white;
 }
