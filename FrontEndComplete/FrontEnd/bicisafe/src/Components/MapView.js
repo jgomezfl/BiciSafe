@@ -1,9 +1,10 @@
 import React from 'react';
 import { GoogleMap, Marker, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import Footer from '../Layouts/Footer';
 
 import { Card, CardContent, CardHeader, IconButton, MenuItem } from "@mui/material";
-import { Box, FormControl, Select, InputLabel } from '@mui/material';
-import { PedalBike, CarCrash, Star, StarBorder } from '@mui/icons-material';
+import { Box, FormControl, Select, InputLabel, TextField } from '@mui/material';
+import { MyLocation, PedalBike, CarCrash, Star, StarBorder, Summarize } from '@mui/icons-material';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { Button } from 'react-bootstrap';
 import usePlacesAutocomplete, {
@@ -19,8 +20,8 @@ import {
 import "@reach/combobox/styles.css";
 import Cookies from "universal-cookie";
 import API from "../services/http-common";
-import { SuccessMessage,InstantMessage } from "../Helpers/Alertas";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 var cookie = new Cookies();
 
 const options = {
@@ -43,13 +44,11 @@ export default function MapView(){
 function Map() {
 
   const [biciusuario, setBiciusuario] = React.useState(cookie.get("bcusuario"));
-  const [error, setError] = React.useState(false);
-  const [success, setSucces] = React.useState(false);
-  const [message, setMessage] = React.useState(null);
+
+  const navigate = useNavigate();
   
-
-
   const [lugares, setLugares] = React.useState([]);
+  const [selectedLugar, setSelectedLugar] = React.useState(null);
   const [calificacion, setCalificacion] = React.useState(null);
   const [auxCalificacion, setAuxCalificacion] = React.useState(null);
   const [calificarReporte, setCalificarReporte] = React.useState([{id: 0, value: false},{id: 1, value: false},{id: 2, value: false},{id: 3, value: false},{id: 4, value: false}]);
@@ -60,6 +59,7 @@ function Map() {
   const [selected, setSelected] = React.useState(null);
   const [marker, setMarker] = React.useState(null);
   const [selectedMarker, setSelectedMarker] = React.useState(null);
+  const [desc, setDesc] = React.useState("");
 
   const mapRef = React.useRef();
   const onMapLoad = React.useCallback((map) => {
@@ -69,6 +69,15 @@ function Map() {
     mapRef.current.panTo({lat, lng});
     mapRef.current.setZoom(14);
   }, []);
+  const goToCurrentLocation = React.useCallback(() => {
+    navigator?.geolocation.getCurrentPosition(
+      ({ coords: { latitude: lat, longitude: lng } }) => {
+        const pos = { lat, lng }
+        mapRef.current.panTo(pos);
+        mapRef.current.setZoom(18);
+      }
+    )
+  },[]);
 
   const [openDialog, setOpenDialog] = React.useState(false);
   const handleOpenDialog = () => { setOpenDialog(true); };
@@ -82,7 +91,19 @@ function Map() {
   const handleOpenCalificacionDialog = () => { setOpenCalificacionDialog(true); };
   const handleCloseCalificacionDialog = () => { setOpenCalificacionDialog(false); }
 
+  const Alerta = (mensaje, tipo) => {
+    Swal.fire({
+        position: 'top',
+        icon: tipo,
+        title: mensaje,
+        showConfirmButton: false,
+        timer: 2500
+    })
+  }
+
   React.useState(() => {
+    cookie.remove("ubicacion", {path: '/'})
+    cookie.set("ubicacion","Principal", {path: '/'})
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
         position => {
@@ -91,6 +112,11 @@ function Map() {
         }
       )
     }
+    API.delete("/reportes/delete").then(({data}) => {
+      for(var i in data){
+        console.log(data[i])
+      }
+    })
     if(biciusuario){
       var path = "/lugares/select/"+biciusuario.ident;
       API.get(path).then(({data}) => {
@@ -110,7 +136,10 @@ function Map() {
         setReportes(aux)
       }
     });
-    const intervalReportes = setInterval(() => {
+    API.delete("/reportes/delete").then(({data}) => {
+      console.log(data)
+    })
+    setInterval(() => {
       API.get("/reportes/select/all").then(({data}) => {
         if(Boolean(data)){
           var aux = []
@@ -120,6 +149,10 @@ function Map() {
           setReportes(aux)
         }
       });
+      var path = "/lugares/select/"+biciusuario.ident
+      API.get(path).then(({data}) => {
+        setLugares(data);
+      });
     }, 20000);
   });
 
@@ -127,6 +160,16 @@ function Map() {
     <>
       <div className='places-container'>
         <PlacesAutocomplete setSelected={setSelected} panTo={panTo} />
+      </div>
+
+      <div className='opciones-container'>
+        <IconButton onClick={goToCurrentLocation} sx={{backgroundColor: "#EBF6C0", border: "2px solid #282c34"}}>
+          <MyLocation/>
+        </IconButton>
+        <br />
+        <IconButton onClick={() => { navigate(("/reportes")); }} sx={{backgroundColor: "#EBF6C0", border: "2px solid #282c34"}} className="mt-3">
+          <Summarize />
+        </IconButton>
       </div>
 
       <GoogleMap
@@ -149,13 +192,25 @@ function Map() {
         {lugares.map((lugar) => (
           <>
             {(lugar.tipo==="Home") ? <Marker key={lugar.id} position={{lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}} 
-            icon={{url: '/HomeIcon.png'}} onClick={() => {console.log({lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)})}}/> : ''}
+            icon={{url: '/HomeIcon.png'}} onClick={() => {
+              var dict = {lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}
+              setSelectedLugar(dict)
+              console.log(selectedLugar)
+            }}/> : ''}
             {(lugar.tipo==="School") ? <Marker key={lugar.id} position={{lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}} 
-            icon={{url: '/SchoolIcon.png'}}/> : ''}
+            icon={{url: '/SchoolIcon.png'}} onClick={() => {
+              var dict = {lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}
+              setSelectedLugar(dict)
+              console.log(selectedLugar)
+            }}/> : ''}
             {(lugar.tipo==="Work") ? <Marker key={lugar.id} position={{lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}} 
             icon={{url: '/WorkIcon.png'}}/> : ''}
             {(lugar.tipo==="Another") ? <Marker key={lugar.id} position={{lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}} 
-            icon={{url: '/BikeIcon.png'}}/> : ''}
+            icon={{url: '/BikeIcon.png'}} onClick={() => {
+              var dict = {lat: parseFloat(lugar.latitud), lng: parseFloat(lugar.longitud)}
+              setSelectedLugar(dict)
+              console.log(selectedLugar)
+            }}/> : ''}
           </>
         ))}
         {reportes.map((reporte) => (
@@ -166,15 +221,15 @@ function Map() {
                 setCalificacion(data);
                 console.log(data);
               })
-              setTimeout(() => {setSelectedReporte(reporte);}, 3000);
+              setTimeout(() => {setSelectedReporte(reporte);}, 2000);
               
               }}/>: ''}
             {(reporte.tipo==="Robber") ? <Marker key={reporte.id} position={{lat: parseFloat(reporte.latitud), lng: parseFloat(reporte.longitud)}}
-            icon={{url: 'RobberIcon.png'}} onClick={() => {
+            icon={{url: 'RobberIcon.png', scaledSize: new window.google.maps.Size(30, 30)}} onClick={() => {
               API.get("/calificaciones/select/calificacion/"+reporte.id).then(({data}) => {
                 setCalificacion(data)
               })
-              setTimeout(() => {setSelectedReporte(reporte);}, 3000);
+              setTimeout(() => {setSelectedReporte(reporte);}, 2000);
               }}/>: ''}
           </>
         ))}
@@ -195,8 +250,8 @@ function Map() {
             setSelectedMarker(null);
            }}
            position={{
-            lat: selectedMarker.lat,
-            lng: selectedMarker.lng
+            lat: parseFloat(selectedMarker.lat),
+            lng: parseFloat(selectedMarker.lng)
            }}
           >
             <Card>
@@ -223,6 +278,36 @@ function Map() {
             </Card>
           </InfoWindow>
         )}
+        {selectedLugar && (
+          <InfoWindow
+           onCloseClick={() => {
+            setSelectedLugar(null);
+           }}
+           position={{
+            lat: selectedLugar.lat,
+            lng: selectedLugar.lng
+           }}
+          >
+            <Card>
+              <CardHeader
+               avatar={
+                <IconButton aria-label="secondaryIcon">
+                  <PedalBike/>
+                </IconButton>
+               }
+               title="LUGAR"
+               subheader="¿Qué deseas hacer?"
+              />
+              <CardContent>
+                <div className="d-flex align-items-center flex-column">
+                  <Link to="/ruta"  state={{LatDestino: parseFloat(selectedLugar.lat), LngDestino: parseFloat(selectedLugar.lng)}}>
+                    <Button className="botones_aplicacion" size="small">Ir</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </InfoWindow>          
+        )}
         {selectedReporte && (
           <InfoWindow
            onCloseClick={() =>{
@@ -244,6 +329,17 @@ function Map() {
               />
               <CardContent>
                 <>
+                  <div>
+                    <TextField 
+                    label="¿Que sucedió?"
+                     defaultValue={selectedReporte.descripcion}
+                     InputProps={{readOnly: true}}
+                     multiline
+                     variant="filled"
+                     sx={{ width: '50ch' }}
+                    />
+                  </div>
+                  <br />
                   <div className='d-flex justify-content-around'>
                     {calificacion.map((cal) => (
                       <>
@@ -260,6 +356,9 @@ function Map() {
           </InfoWindow>
         )}
       </GoogleMap>
+
+      {/* Aqui va el footer */}
+      <Footer />
 
       <Dialog
        open={openDialog}
@@ -313,7 +412,7 @@ function Map() {
               API.post("/lugares/save", dict).then(({data}) => {
                 console.log(data);
                 lugares.push(dict);
-                // setMarker(null);
+                setMarker(null);
                 handleCloseDialog();
               })
             }
@@ -335,7 +434,7 @@ function Map() {
         </DialogTitle>
         <DialogContent id ="alert-dialog-description">
           Por favor ingresa el motivo de tu reporte y confirmalo.
-          <Box sx={{display:"flex", flexWrap:"wrap", justifyContent:"space-around" }}>
+          <Box>
             <div>
               <FormControl className="mt-5" sx={{ m: 1, width: '25ch' }} variant="outlined">
                 <InputLabel>Motivo del Reporte</InputLabel>
@@ -348,12 +447,24 @@ function Map() {
                 </Select>
               </FormControl>
             </div>
+            <div>
+              <TextField
+               autoFocus
+               required
+               margin="dense"
+               label="Descripción del hecho"
+               fullWidth
+               multiline
+               onChange={(e) => {setDesc(e.target.value)}}
+               variant="standard"
+               inputProps={{maxLength : 250}}/>
+              </div>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button className='btn btn-danger' onClick={handleCloseReportDialog}>Cancelar</Button>
           <Button className='btn btn-success' onClick={() => {
-            if(tipoLugar === "Crash" || tipoLugar === "Robber"){
+            if((tipoLugar === "Crash" || tipoLugar === "Robber") && desc !== ""){
               var aux = null;
               if(biciusuario){
                 aux = biciusuario.ident;
@@ -361,16 +472,20 @@ function Map() {
               var dict = {
                 ident: aux,
                 tipo: tipoLugar,
+                descripcion: desc,
                 latitud: selectedMarker.lat,
                 longitud: selectedMarker.lng,
-                calificacion: 0.0,
-                cantidadCalificaciones: 0,
               }
               API.post("/reportes/save",dict).then(({data}) => {
                 console.log(data);
                 reportes.push(dict)
                 handleCloseReportDialog();
+                Alerta("Reporte almacenado","success");
+                setMarker(null)
               })
+            }
+            if(desc === ""){
+              Alerta("Porfavor ingresa una descripción de lo sucedido","error")
             }
           }}>Reportar</Button>
         </DialogActions>
@@ -427,44 +542,33 @@ function Map() {
           <Button className='btn btn-success' onClick={() => {
             setBiciusuario(cookie.get("bcusuario"));
             if(!biciusuario){
-              setMessage("No puedes calificar sin iniciar sesión");
-              setError(true);
+              Alerta("No puedes calificar sin iniciar sesión", "error")
             }
             else{
-              if(auxCalificacion+1){
+              if(auxCalificacion){
                 var dict = {
                   reporteId: selectedReporte.id,
                   ident: biciusuario.ident,
-                  calificacion: auxCalificacion,
+                  calificacion: auxCalificacion+1,
                 }
                 API.post("/calificaciones/save", dict).then(({data}) => {
                   if (data !== "Success"){
-                    setMessage(data);
-                    setError(true);
+                    Alerta(data, "error")
                   }
                   else{
-                    setMessage("Calificación almacenada");
-                    setSucces(true);
+                    Alerta("Calificación almacenada","success")
                     handleCloseCalificacionDialog();
                     setSelectedReporte(null);
                   }
                 })
               }
               else{
-                setMessage("No seleccionaste ninguna estrella");
-                setError(true);
+                Alerta("No seleccionaste ninguna estrella","error")
               }
             }
-            setTimeout(() => {
-              setError(false);
-              setSucces(false);
-            }, 3000);
           }}>Calificar</Button>
         </DialogActions>
       </Dialog>
-
-      {success ? <SuccessMessage message = {message}/> : `` }
-      {error ? <InstantMessage message = {message}/> : `` }
     </>
   );
 }

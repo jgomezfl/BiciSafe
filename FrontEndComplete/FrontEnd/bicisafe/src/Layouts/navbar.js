@@ -2,16 +2,17 @@
 //   importante, el nombre de las cookies son "logged" booleano para ver si esta loggeado y "bcusuario" en este guardamoslos datos del usuario sin el password que no se trae de la bd   //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 import React from "react";
+import ReactDOM from "react-dom"
 
 import logo from "./../assets/logo.png";
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiFacebook, FiLinkedin, FiInstagram } from 'react-icons/fi';
 
 //componentes bootstrap
-import { Button, Nav, Navbar, Modal } from 'react-bootstrap';
+import { Button, Nav, Navbar, Modal, NavDropdown } from 'react-bootstrap';
 import { Container, Row, Col } from "react-bootstrap";
 
 //importamos componentes MUI material
-import { Typography, IconButton, Paper, Box} from '@mui/material';
+import { Typography, IconButton, Paper, Box } from '@mui/material';
 import { Visibility, VisibilityOff, AccountCircle, LogoutOutlined, Report, Delete,Add, PedalBike } from '@mui/icons-material'; //importamos los iconos de MUI material
 import { OutlinedInput, InputLabel, InputAdornment, FormControl, TextField } from '@mui/material'; //importamos lo necesario para el formulario
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
@@ -23,27 +24,36 @@ import * as Yup from 'yup';
 //importamos componente de la cookies
 import Cookies from "universal-cookie";
 
-//importamos alertas
-import { SuccessMessage, InstantMessage } from "../Helpers/Alertas";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 
-import { Outlet, Link } from "react-router-dom";
-
-import { useState } from "react";
+import { useEffect,useState } from "react";
 
 //importamos API
 import API from "../services/http-common";
+import Swal from "sweetalert2";
 
 let validationSchema = Yup.object().shape({
     correo: Yup.string().required('Correo es requerido')
         .email('Email invalido'),
     contrasena: Yup.string().required('Contraseña es requerida')
 });
+let validationSchema2 = Yup.object().shape({
+    desc: Yup.string().required("Por favor ingresa una corta descripción del hecho")
+});
 
 var cookie = new Cookies();
 
 const NavbarExample = () => {
+    const [ubicacion, setUbicacion] = React.useState(cookie.get("ubicacion"));
     //estilo icono
     const fontStyles = {fontSize: '40px'};
+    const iconStyles = { color: "#282c34", fontSize: "25px" };
+
+    const navigate = useNavigate();
+
+    React.useEffect(() => {
+        setUbicacion(cookie.get("ubicacion"))
+    });
 
     //guardamos los datos del usuario sin el password
     const [biciusuario, setBiciusuario] = useState(cookie.get("bcusuario"));
@@ -73,11 +83,6 @@ const NavbarExample = () => {
     // const handleOpenDialogReporte = () => { setOpenDialogReporte(true); };
     // const handleCloseDialogReporte = () => { setOpenDialogReporte(false); };
 
-    //mensaje de las alertas
-    const [message, setMessage] = React.useState('');
-    const [succes, setSucces] = React.useState(false);
-    const [error, setError] = React.useState(false);
-
     //show login modal
     const [showModalLogin, setShowModalLogin] = useState(false);
     const handleOpenLoginModal = () => setShowModalLogin(true);
@@ -91,16 +96,85 @@ const NavbarExample = () => {
     };
     const handleCloseModalMenu = ()  => setShowModalMenu(false);
 
+    //show modal about us 
+    const [showModalAboutUs, setShowModalAboutUs] = useState(false);
+    const handleOpenModalAboutUs = () => {
+        setShowModalAboutUs(true);
+
+    };
+
+    const handleCloseModalAboutUs = ()  => setShowModalAboutUs(false);
+
+    const Alerta = (mensaje, tipo) => {
+        Swal.fire({
+            position: 'top',
+            icon: tipo,
+            title: mensaje,
+            showConfirmButton: false,
+            timer: 2500
+        })
+    }
+
     //show modals
     const handleShowModals = () => {
         if(loggeado === undefined){
             handleOpenLoginModal();
         }
         else{
-            setBicicletas(cookie.get("bicicletas"));
-            console.log(cookie.get("bicicletas"));
+            var path = "bicicletas/select/all/"+biciusuario.ident;
+            API.get(path).then(({data}) => {
+                setBicicletas(data);
+            })
+            console.log(bicicletas)
             handleOpenModalMenu();
         }
+    }
+
+    const handleShowModalsAboutUs= () => {
+        if(loggeado === undefined){
+            handleOpenLoginModal();
+        }
+        else{
+            handleOpenModalAboutUs();
+        }
+    }
+
+    //Show button paypal
+    const PayPalButton = window.paypal.Buttons.driver("react", { React, ReactDOM });
+
+    const [price, setPrice] = useState(0);
+    const[opcion, setOpcion] = useState(1);
+
+    useEffect(() =>{
+        if(opcion !== "other"){
+            setPrice(opcion);
+        }
+    },[opcion]);
+    
+
+    const changePrice = (e) => {
+        setPrice(e.target.value);
+    }
+
+    const changePriceOption = (e) => {
+        setOpcion(e.target.value);
+    }
+    
+    const createOrder = (data, actions) => {
+        return actions.order.create({
+            purchase_units: [
+            {
+                amount: {
+                value: price,
+                currency: 'USD'
+                },
+            },
+            ],
+        });
+    }
+
+    const onApprove = (data, actions) => {
+        return actions.order.capture(console.log("Pago exitoso"));
     }
 
     const handleShowPassword = () =>{
@@ -123,12 +197,15 @@ const NavbarExample = () => {
         SetLoggeado(undefined);
         setBiciusuario(undefined);
         setBicicletas(undefined);
+        setBicicleta(undefined);
 
         cookie.remove("logged", { path: '/' });
         cookie.remove("bcusuario", { path: '/' });
         cookie.remove("bicicletas", { path: '/' });
 
         handleCloseModalMenu();
+        Alerta("Hasta Pronto","success")
+        navigate(("/"));
     }
 
     function borrarBicicleta(){
@@ -150,11 +227,12 @@ const NavbarExample = () => {
         handleCloseDialog();
     }
 
-    function reportarBicicleta(){
+    function reportarBicicleta(desc){
         var dict = {
             serie: bicicleta.serie,
             ident: biciusuario.ident,
-            tipo: "Stolen"
+            tipo: "Stolen",
+            descripcion: desc,
         }
         API.post("/reportes/save",dict).then(({data}) => {
             console.log(data);
@@ -174,29 +252,41 @@ const NavbarExample = () => {
         handleCloseReportDialog();
         handleCloseModalMenu();
         setBicicleta(null);
+        Alerta("Hecho reportado","success")
     }
 
     return (
         <>
             <Navbar className="color-nav d-flex justify-content-around" collapseOnSelect expand="lg" variant="light">
-
-                <Nav.Link as={Link} to="/">
-                    <img
-                      onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}
-                      width="100"
-                      height="15%"
-                      src={logo}
-                      className="d-inline-block align-top"
-                      alt="React Bootstrap logo"
-                    />
-                </Nav.Link>
+                <div className="d-flex align-items-center">
+                    <Nav.Link as={Link} to ="/">
+                        <img
+                         onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}
+                         width="100"
+                         height="15%"
+                         src={logo}
+                         className="d-inline-block align-top"
+                         alt="React Bootstrap logo"
+                        />
+                    </Nav.Link>
+                    <NavDropdown title={ubicacion}>
+                        <NavDropdown.Item>
+                            <Nav.Link as={Link} to ="/">
+                                Principal
+                            </Nav.Link>
+                        </NavDropdown.Item>
+                        <NavDropdown.Item>
+                            <Nav.Link as={Link} to ="/reportes">
+                                Reportes
+                            </Nav.Link>
+                        </NavDropdown.Item>
+                    </NavDropdown>
+                </div>
+                
 
                 <Nav.Link onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
                     <FiUser onClick={handleShowModals} style={fontStyles} /> 
                 </Nav.Link>
-
-                {succes ? <SuccessMessage message = {message}/> : `` }
-                {error ? <InstantMessage message = {message}/> : `` }
 
             </Navbar>
 
@@ -222,28 +312,6 @@ const NavbarExample = () => {
                 </DialogActions>
             </Dialog>
 
-            <Dialog
-             open={openReportDialog}
-             onClose={handleCloseReportDialog}
-             aria-labelledby="alert-dialog-title"
-             aria-describedby="alert-dialog-description">
-                <DialogTitle id="alert-dialog-title">{"¿Deseas Reportar esta bicicleta?"}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        Por favor confirma en caso de realmente querer reportar la bicicleta como robada, de otra forma
-                        solo cancela la solicitud.
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
-                        Cancelar
-                    </Button>
-                    <Button onClick={reportarBicicleta} className="btn btn-danger">
-                        Eliminar
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
             <Modal show={showModalMenu} onHide={handleCloseModalMenu}>
                 <Modal.Header closeButton>
                     <Modal.Title>Menu</Modal.Title>
@@ -259,7 +327,7 @@ const NavbarExample = () => {
                     <Paper className="ps-1 pe-1
                     " sx={{maxHeight: '200px', overflow: 'auto', borderColor: 'grey.500', borderStyle: 'solid', borderWidth: '0.1em'}}>
                         { 
-                        Boolean(bicicletas) ?
+                        (bicicletas !== undefined && bicicletas.length > 0) ?
                             bicicletas.map((bicicleta) =>
                             <>
                                 {(bicicleta.robada) ? (
@@ -272,6 +340,7 @@ const NavbarExample = () => {
                                         <p className="mt-0 mb-0">{bicicleta.color}</p>
                                     </div>
                                     <div className="d-flex me-3">
+                                        {/* <IconButton onClick={() => {console.log("Ya no esta robada uwu")}}></IconButton> */}
                                         <IconButton className="ms-1" onClick={ () => {handleOpenDialog(); setSerie(bicicleta.serie); }}><Delete sx={{ fontSize: 20, color: "#A75858" }}/></IconButton>
                                     </div>
                                 </Box>
@@ -288,6 +357,7 @@ const NavbarExample = () => {
                                         <IconButton onClick={() => {
                                             setBicicleta(bicicleta)
                                             handleOpenReportDialog();
+                                            handleCloseModalMenu();
                                         }}><Report sx={{ fontSize: 20 }}/></IconButton>
                                         <IconButton className="ms-1" onClick={ () => {handleOpenDialog(); setSerie(bicicleta.serie); }}><Delete sx={{ fontSize: 20, color: "#A75858" }}/></IconButton>
                                     </div>
@@ -329,6 +399,57 @@ const NavbarExample = () => {
                 </Modal.Body>
             </Modal>
 
+            <Modal show={openReportDialog} onHide={handleCloseReportDialog}>
+                <Modal.Header closeButton>
+                    <Modal.Title>¿Que sucedió?</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Formik
+                     initialValues={{desc:""}}
+                     onSubmit={(values) => {
+                        reportarBicicleta(values.desc);
+                     }}
+                     validationSchema={validationSchema2}>
+                        {({handleChange,handleSubmit,errors}) => (
+                            <>
+                            <Paper >
+                                <Container >
+                                    <TextField
+                                     autoFocus
+                                     required
+                                     margin="dense"
+                                     label="Descripción del hecho"
+                                     fullWidth
+                                     multiline
+                                     onChange={handleChange('desc')}
+                                     error={errors.desc ? true : false}
+                                     variant="standard"
+                                     inputProps={{maxLength : 250}}/>
+                                    <Typography variant="inherit" color="textSecondary">
+                                        {errors.desc}
+                                    </Typography>
+                                    <br />
+                                    <Row className="justify-content-md-center">
+                                        <Button onClick={() => {
+                                            handleCloseReportDialog();
+                                            handleOpenModalMenu();
+                                        }} color="primary" className="ms-2 me-2">
+                                            Cancelar
+                                        </Button> 
+                                    </Row>
+                                    <Row className="justify-content-md-center mt-1">
+                                        <Button onClick={handleSubmit} className="btn btn-danger ms-2 me-2">
+                                            Reportar
+                                        </Button> 
+                                    </Row>
+                                </Container>
+                            </Paper>
+                            </>
+                        )}
+                    </Formik>
+                </Modal.Body>
+            </Modal>
+
             <Modal show={showModalLogin} onHide={handleCloseLoginModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Login</Modal.Title>
@@ -354,18 +475,14 @@ const NavbarExample = () => {
                                             setBicicletas(data);
                                         }
                                     })
-                                    
-                                    setMessage("Bienvenido");
-                                    setSucces(true);
+                                    Alerta("Bienvenido", "success")
                                 }
                                 else{
-                                    setMessage("Correo o contraseña incorrectas");
-                                    setError(true);
+                                    Alerta("Correo o contraseña incorrectas", "error")
                                     console.log(data);
                                 }
                             });
-                            setSucces(false);
-                            setError(false);
+                            navigate(("/"));
 
                         }}
                         validationSchema = {validationSchema}>
@@ -381,7 +498,8 @@ const NavbarExample = () => {
                                                  label="Correo"
                                                  onChange={handleChange('correo')}
                                                  error={errors.correo ? true : false}
-                                                 sx={{ m: 1, width: '25ch' }}/>
+                                                 sx={{ m: 1, width: '25ch' }}
+                                                 inputProps={{maxLength : 30}}/>
                                                 <Typography variant="inherit" color="textSecondary">
                                                     {errors.correo}
                                                 </Typography>
@@ -410,6 +528,7 @@ const NavbarExample = () => {
                                                         }
                                                         onChange={handleChange('contrasena')}
                                                         error={errors.contrasena ? true : false}
+                                                        inputProps={{maxLength : 30}}
                                                         label="Contraseña"/>
                                                 </FormControl>
                                                 <Typography variant="inherit" color="textSecondary">
@@ -447,6 +566,80 @@ const NavbarExample = () => {
                     
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={showModalAboutUs} onHide={handleCloseModalAboutUs}>
+                <Modal.Header closeButton>
+                    <Modal.Title>About Us</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>
+                        <h1 className="text-center"> Colabora con Bicisafe </h1>
+                        <h5 className="text-center"> Estas donando {price} $</h5>
+                    </div>
+                    
+                    <select value={opcion} className="form-control" onChange={changePriceOption}>
+                        <option value="1">1 usd</option>
+                        <option value="3">3 usd</option>
+                        <option value="5">5 usd</option>
+                        <option value="other">Otro valor</option>
+                    </select>
+                    
+                    {opcion === "other" && (
+                        <input type ="text" className="form-control" onChange={changePrice} value={price}></input>
+                    )}
+                    
+                    <br></br>
+                    <div>
+                        <PayPalButton
+                            createOrder={(data, actions) => createOrder(data, actions)}
+                            onApprove={(data, actions) => onApprove(data, actions)}
+                        />
+                    </div> 
+                    
+                     <div class="d-grid gap-3" >
+                        
+                        <Nav.Link as={Link} to="/nosotros" >
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Bicisafe</div>
+                        </Nav.Link>
+
+                        <Nav.Link as={Link} to="/preguntasFrecuentes" >
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Preguntas frecuentes</div>
+                        </Nav.Link>
+                        
+                        <Nav.Link as={Link} to="/informacionLegal" state={{ruta: "/"}}>
+                            <div class="p-2 bg-light border" onClick={handleCloseModalAboutUs}>Informacion legal</div>
+                        </Nav.Link>
+
+                    </div>
+                    <br></br>
+                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                        <a
+                        className="App-link"
+                        href="https://www.facebook.com/profile.php?id=100087472195351"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiFacebook style={iconStyles} />  
+                        </a>
+                        <a
+                        className="App-link"
+                        href="https://www.linkedin.com/company/bicisafeapp/"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiLinkedin style={iconStyles} />  
+                        </a>
+                        <a
+                        className="App-link"
+                        href="https://www.instagram.com/bicisafeapp/"
+                        target={"_blank"}
+                        rel="noopener noreferrer" onMouseOver={changeBackground} onMouseLeave={changeBackgroundAgain}>
+                            <FiInstagram style={iconStyles} /> 
+                        </a>                    
+                    </div>
+                
+                    
+                </Modal.Body>
+            </Modal>
+
 
             <section>
                 <Outlet></Outlet>

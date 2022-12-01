@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { Container, Button, Nav } from "react-bootstrap";
 
-import { Card, CardActions, CardHeader, CardContent } from '@mui/material'; //importamos todo de las cartas
+import { Card, CardActions, CardHeader, CardContent, Autocomplete } from '@mui/material'; //importamos todo de las cartas
 import { Typography, IconButton, Paper} from '@mui/material';
 import { Save, Cancel, PedalBike } from '@mui/icons-material'; //importamos los iconos de MUI material
 import { Box, TextField } from '@mui/material'; //importamos lo necesario para el formulario
@@ -14,74 +14,92 @@ import { Outlet, Link, useNavigate } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
-import { InstantMessage } from "../Helpers/Alertas";
+import FooterFormulario from "../Layouts/FooterFormulario";
+import Footer from "../Layouts/Footer";
 
 import Cookies from "universal-cookie";
+import Swal from "sweetalert2";
 
 let validationSchema = Yup.object().shape({
     serie: Yup.string().required("Número de serie es requerido"),
     modelo: Yup.string().required("Modelo dela bicicleta requerido"),
     color: Yup.string(),
-    vendedor: Yup.string().required("Vendedor requerido")
+    vendedor: Yup.string().required("Vendedor requerido"),
+    descripcion: Yup.string().required("La descripción puede ayudarnos a identificar tu bicicleta")
 })
 
 var cookie = new Cookies();
 
+
 const RegBicicleta = () => {
 
-    const [biciusuario, setBiciusuario] = React.useState(cookie.get("bcusuario"));
-    const [bicicletas, setBicicletas] = React.useState(cookie.get("bicicletas"));
-    const [error, setError] = React.useState(false);
-    const [message, setMessage] = React.useState('');
+    const [width, setWidth] = React.useState(window.innerWidth);
+    const [height, setHeight] = React.useState(window.innerHeight);
+
+    const handleResize = () => {
+        setWidth(window.innerWidth);
+        setHeight(window.innerHeight);
+        console.log(window.innerWidth);
+        console.log(window.innerHeight);
+    };
+
+    React.useState(() => {
+        cookie.remove("ubicacion", {path: '/'})
+        cookie.set("ubicacion","Registrar Bicicleta", {path: '/'})
+    })
+
+    React.useEffect(() => {
+        window.addEventListener("resize", handleResize);
+      }, []);
+
+    const [biciusuario] = React.useState(cookie.get("bcusuario"));
     const navigate = useNavigate();
 
-    function enviar_mensaje(ident, serie){
-        var correoRobado = null;
-        var path = "/biciusuarios/select/"+ident
-        API.get(path).then(({data}) => {
-            correoRobado = data.correo
+    const colores = [
+        {label: 'Blanco'},
+        {label: 'Negro'},
+        {label: 'Rojo'},
+        {label: 'Gris'},
+        {label: 'Verde'},
+        {label: 'Azul'}
+    ]
+
+    const Alerta = (mensaje, tipo) => {
+        Swal.fire({
+            position: 'top',
+            icon: tipo,
+            title: mensaje,
+            showConfirmButton: false,
+            timer: 2500
         })
-        const timeFuntion = setTimeout(() => {
-            var dict = {recipient: correoRobado, msgBody: "Alguien ha intentado registrar la bicicleta: "+serie+" que has reportado como robada"+"\n"+"Contactate con: "+biciusuario.correo, subject:"Hemos encontrado tu bici!!"}
-            API.post("/sendMail", dict).then(response => {
-                console.log(response);
-            }).catch(error => {
-                console.log(error.response);
-            });
-        }, 1000);
-        
     }
     
     return (
         <>
             <Formik
-             initialValues={{ ident: biciusuario.ident, serie: "", modelo: "", color: "", vendedor: "", robada: false }}
+             initialValues={{ ident: biciusuario.ident, serie: "", modelo: "", color: "", vendedor: "", robada: false, descripcion: "" }}
              onSubmit={(values) => {
-                
                 API.post("/bicicletas/save", values).then(({data}) => {
                     if(data === 'Bicicleta ya registrada'){
-                        setMessage(data);
+                        var aux = true;
                         var path = "/reportes/select/robada/"+values.serie
                         API.get(path).then(({data}) => {
                             if(data){
-                                setMessage("Bicicleta reportada como robada");
-                                enviar_mensaje(data.ident, data.serie);
+                                aux = false;
+                                Alerta("Bicicleta reportada como robada", "warning")
+                                // enviar_mensaje(data.ident, data.serie);
                             }
                         })
-                        setError(true);
+                        if(aux){
+                            Alerta(data, "error");
+                        }
                     }
                     else{
-                        cookie.remove("bicicletas", { path: '/' });
-                        if(bicicletas === undefined){
-                            bicicletas = [values]
-                        } else {
-                            bicicletas.push(values);
-                        }
-                        cookie.set("bicicletas", bicicletas, {path: '/'});
+                        Alerta("Bicicleta registrada","success")
                         navigate(("/"));
                     }
                 });
-                setError(false);
+                // console.log(values)
              }}
              validationSchema = {validationSchema}
              >
@@ -108,6 +126,7 @@ const RegBicicleta = () => {
                                                  onChange={handleChange('serie')}
                                                  error={errors.serie ? true : false}
                                                  sx={{ m: 1, width: '25ch' }}
+                                                 inputProps={{maxLength : 20}}
                                                 />
                                                 <Typography variant="inherit" color="textSecondary">
                                                     {errors.serie}
@@ -120,17 +139,27 @@ const RegBicicleta = () => {
                                                  onChange={handleChange('modelo')}
                                                  error={errors.modelo ? true : false}
                                                  sx={{ m: 1, width: '25ch' }}
+                                                 inputProps={{maxLength : 20}}
                                                 />
                                                 <Typography variant="inherit" color="textSecondary">
                                                     {errors.modelo}
                                                 </Typography>
                                             </div>
                                             <div>
-                                                <TextField
-                                                 label="Color de la bicicleta"
-                                                 onChange={handleChange('color')}
-                                                 error={errors.color ? true : false}
+                                                <Autocomplete 
+                                                 disablePortal
+                                                 options={colores}
+                                                 onSelect={handleChange('color')}
                                                  sx={{ m: 1, width: '25ch' }}
+                                                 renderInput={(params) => <TextField {...params} label="Color de la bicicleta"
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        inputProps: {
+                                                            ...params.inputProps,
+                                                            maxLength: 20 
+                                                        }
+                                                    }}
+                                                    onChange={handleChange('color')} error={errors.color ? true : false}/>}
                                                 />
                                                 <Typography variant="inherit" color="textSecondary">
                                                     {errors.color}
@@ -143,9 +172,26 @@ const RegBicicleta = () => {
                                                  onChange={handleChange('vendedor')}
                                                  error={errors.vendedor ? true : false}
                                                  sx={{ m: 1, width: '25ch' }}
+                                                 inputProps={{maxLength : 30}}
                                                 />
                                                 <Typography variant="inherit" color="textSecondary">
                                                     {errors.vendedor}
+                                                </Typography>
+                                            </div>
+                                        </Box>
+                                        <Box className="ms-5 me-5">
+                                            <div>
+                                                <TextField
+                                                 required
+                                                 label="Descripción de la bicicleta"
+                                                 fullWidth
+                                                 multiline
+                                                 onChange={handleChange('descripcion')}
+                                                 error={errors.descripcion ? true : false}
+                                                 inputProps={{maxLength : 250}}
+                                                />
+                                                <Typography variant="inherit" color="textSecondary">
+                                                    {errors.descripcion}
                                                 </Typography>
                                             </div>
                                         </Box>
@@ -157,7 +203,7 @@ const RegBicicleta = () => {
                                                 </IconButton>
                                             </Button>
                                             <Nav.Link as={Link} to="/">
-                                                <Button size="small" className="botones_aplicacion">
+                                                <Button size="small" className="botones_aplicacion_rojos">
                                                     CANCELAR
                                                     <IconButton aria-label="cancel">
                                                         <Cancel/>
@@ -165,7 +211,6 @@ const RegBicicleta = () => {
                                                 </Button>
                                             </Nav.Link>
                                         </CardActions>
-                                        {error ? <InstantMessage message = {message} /> : `` }
                                     </Paper>
                                 </CardContent>
                             </Card>
@@ -173,6 +218,8 @@ const RegBicicleta = () => {
                     </>
                 )}
             </Formik>
+
+            {(height < 843 && width < 774) ? (<Footer />) : (<FooterFormulario />)}
 
             <section>
                 <Outlet></Outlet>
