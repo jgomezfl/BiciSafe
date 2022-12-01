@@ -12,15 +12,19 @@ import { Box, OutlinedInput, InputLabel, InputAdornment, FormControl, TextField 
 //API
 import API from "../services/http-common";
 
+import FooterFormulario from "../Layouts/FooterFormulario";
+import Footer from "../Layouts/Footer";
+
 //componentes router para la navegación
 import { Outlet, Link, useNavigate} from "react-router-dom";
 
 //formValidation
 import { Formik } from "formik";
 import * as Yup from 'yup';
+import Swal from "sweetalert2";
+import Cookies from "universal-cookie";
 
-//importamos el componente de alertas
-import { InstantMessage, SuccessMessage } from "../Helpers/Alertas";
+var cookie = new Cookies();
 
 let validationSchema  = Yup.object().shape({
     correo: Yup.string().required('Correo es requerido')
@@ -34,13 +38,36 @@ let validationSchema  = Yup.object().shape({
 });
 
 const Login = () => {
+    
+    React.useState(() => {
+        cookie.remove("ubicacion", {path: '/'})
+        cookie.set("ubicacion","Recuperar Contraseña", {path: '/'})
+    })
 
-   //mensaje de las alertas
-    const [message, setMessage] = React.useState('');
-    const [succes, setSucces] = React.useState(false);
-    const [error, setError] = React.useState(false);
+    const [width, setWidth] = React.useState(window.innerWidth);
+    const [height, setHeight] = React.useState(window.innerHeight);
 
-    const [cuenta, setCuenta] = React.useState({});
+    const handleResize = () => {
+        setWidth(window.innerWidth);
+        setHeight(window.innerHeight);
+        console.log(window.innerWidth);
+        console.log(window.innerHeight);
+    };
+
+    React.useEffect(() => {
+        window.addEventListener("resize", handleResize);
+      }, []);
+
+    const Alerta = (mensaje, tipo) => {
+        Swal.fire({
+            position: 'top',
+            icon: tipo,
+            title: mensaje,
+            showConfirmButton: false,
+            timer: 2500
+        })
+    }
+
     const [state1, setState1] = React.useState(false);
     const [state2, setState2] = React.useState(false);
     const [randomCode, setRandomCode] = React.useState("");
@@ -73,10 +100,6 @@ const Login = () => {
         event.preventDefault();
     };
 
-    const mensajeError = async (mensaje) => {
-        
-    }
-
     return (
         <>
             <Formik
@@ -89,11 +112,9 @@ const Login = () => {
                         var msg = {recipient: values.correo, msgBody: "El código de recuperación es: "+randomGeneratedNumber, subject:"Código de recuperación de contraseña"}
                         API.post("/biciusuarios/save/correo", dict).then(({data}) => {
                             if(Boolean(data)){
-                                setCuenta(data);
                                 setState1(true);
                                 setRandomCode(randomGeneratedNumber);
-                                setMessage("Código de confirmación enviado");
-                                setSucces(true);
+                                Alerta("Código de confirmación enviado", "success")
 
                                 API.post("/sendMail", msg).then(response => {
                                     console.log(response);
@@ -108,26 +129,20 @@ const Login = () => {
                         // var codigo_aleatorio = values.codigo;
                         console.log(randomCode);
                         if(values.codigo === randomCode){
-                            setMessage("Código de seguridad concuerda");
-                            setSucces(true);
+                            Alerta("Código de seguridad concuerda","success")
                             setState2(true);
                         }
                         else{
-                            setMessage("Código de seguridad incorrecto");
-                            setError(true);
+                            Alerta("Código de seguridad incorrecto","error");
                         }
                     } else {
                         API.put("/biciusuarios/update/password",{correo: values.correo, contrasena: values.contrasena}).then(({data}) => {
-                            // console.log(data);
+                            Alerta("La contraseña fue reestablecida","success")
                             navigate(("/"));
                         }).catch(error => {
                             console.log(error.response);
                         });
                     }
-                    setTimeout(function(){
-                        setError(false);
-                        setSucces(false);
-                    }, 2000);
 
                 }}
                 validationSchema = {validationSchema}
@@ -143,12 +158,12 @@ const Login = () => {
                                         <PedalBike/>
                                     </IconButton>
                                 }
-                                title="REGISTRO"
+                                title="Recuperar Contraseña"
                                 subheader="Por favor ingresa tus datos completos"
                             />
                             <CardContent>
                                 <Paper>
-                                    <Box sx={{display:"flex", flexWrap:'wrap', justifyContent: 'space-around'}}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-around', flexWrap:'wrap' }}>
                                         <div>
                                             <TextField
                                              required
@@ -156,6 +171,7 @@ const Login = () => {
                                              onChange={handleChange('correo')}
                                              error={errors.correo ? true : false}
                                              sx={{ m: 1, width: '25ch' }}
+                                             inputProps={{maxLength : 30}}
                                             />
                                             <Typography variant="inherit" color="textSecondary">
                                                 {errors.correo}
@@ -169,13 +185,14 @@ const Login = () => {
                                              onChange={handleChange('codigo')}
                                              error={errors.codigo ? true : false}
                                              sx={{ m: 1, width: '25ch' }}
+                                             inputProps={{maxLength : 4}}
                                             />
                                             <Typography variant="inherit" color="textSecondary">
                                                 {errors.codigo}
                                             </Typography>
                                         </div>
                                         <div>
-                                            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
+                                                <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" disabled={!state2}>
                                                 <InputLabel htmlFor="outlined-adornment-password">Contraseña</InputLabel>
                                                 <OutlinedInput
                                                     disabled={!state2}
@@ -194,6 +211,7 @@ const Login = () => {
                                                     }
                                                     onChange={handleChange('contrasena')}
                                                     error={errors.contrasena ? true : false}
+                                                    inputProps={{maxLength : 30}}
                                                     label="Contraseña" />
                                             </FormControl>
                                             <Typography variant="inherit" color="textSecondary">
@@ -201,8 +219,8 @@ const Login = () => {
                                             </Typography>
                                         </div>
                                         <div>
-                                            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined">
-                                                <InputLabel htmlFor="outlined-adornment-password">Contraseña</InputLabel>
+                                            <FormControl sx={{ m: 1, width: '25ch' }} variant="outlined" disabled={!state2}>
+                                                <InputLabel htmlFor="outlined-adornment-password">Confirmar Contraseña</InputLabel>
                                                 <OutlinedInput
                                                     disabled={!state2}
                                                     type={values.showConfirmPassword ? 'text' : 'password'}
@@ -220,6 +238,7 @@ const Login = () => {
                                                     }
                                                     onChange={handleChange('conf_contrasena')}
                                                     error={errors.conf_contrasena ? true : false}
+                                                    inputProps={{maxLength : 30}}
                                                     label="Confirmar Contraseña" />
                                             </FormControl>
                                             <Typography variant="inherit" color="textSecondary">
@@ -235,7 +254,7 @@ const Login = () => {
                                             </IconButton>
                                         </Button>
                                         <Nav.Link as={Link} to="/">
-                                            <Button size="small" className="botones_aplicacion">
+                                            <Button size="small" className="botones_aplicacion_rojos">
                                                 CANCELAR
                                                 <IconButton aria-label="cancel">
                                                     <Cancel/>
@@ -243,8 +262,6 @@ const Login = () => {
                                             </Button>
                                         </Nav.Link>
                                     </CardActions>
-                                    {error ? <InstantMessage message = {message} /> : `` }
-                                    {succes ? <SuccessMessage message = {message}/> : `` }
                                 </Paper>
                             </CardContent>
                         </Card>
@@ -252,6 +269,8 @@ const Login = () => {
                 </>
             )}
             </Formik>
+
+            {(height < 843 && width < 774) ? (<Footer />) : (<FooterFormulario />)}
 
             <section>
                 <Outlet></Outlet>

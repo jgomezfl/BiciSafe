@@ -4,12 +4,14 @@ import React from 'react';
 import { Button } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MyLocation, PedalBike, CarCrash, Star, StarBorder } from '@mui/icons-material';
-import { Box, FormControl, Select, InputLabel } from '@mui/material';
+import { Box, FormControl, Select, InputLabel, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import API from '../services/http-common';
-import { SuccessMessage,InstantMessage } from "../Helpers/Alertas";
 import Cookies from "universal-cookie";
+import Swal from 'sweetalert2';
+import Footer from '../Layouts/Footer';
 var cookie = new Cookies();
+
 
 
 export default function Ruta() {
@@ -26,9 +28,6 @@ export default function Ruta() {
 function Map() {
 
   const [biciusuario, setBiciusuario] = React.useState(cookie.get("bcusuario"));
-  const [error, setError] = React.useState(false);
-  const [success, setSucces] = React.useState(false);
-  const [message, setMessage] = React.useState(null);
 
   const [viaje, setViaje] = React.useState(false);
   const [info, setInfo] = React.useState(null);
@@ -43,6 +42,7 @@ function Map() {
   const [centerMarker, setCenterMarker] = React.useState(null);
   const [currentLocation, setCurrentLocation] = React.useState(null);
   const [tipoLugar, setTipoLugar] = React.useState(null);
+  const [desc, setDesc] = React.useState("");
 
   const [openCalificacionDialog, setOpenCalificacionDialog] = React.useState(null);
   const handleOpenCalificacionDialog = () => { setOpenCalificacionDialog(true); };
@@ -72,6 +72,16 @@ function Map() {
     )
   },[]);
 
+  const Alerta = (mensaje, tipo) => {
+    Swal.fire({
+        position: 'top',
+        icon: tipo,
+        title: mensaje,
+        showConfirmButton: false,
+        timer: 2500
+    })
+  }
+
   React.useState(() => {
     navigator?.geolocation.getCurrentPosition(
       ({ coords: { latitude: lat, longitude: lng } }) => {
@@ -82,6 +92,8 @@ function Map() {
         setMarkerPos({lat: location.state.LatDestino, lng: location.state.LngDestino})
       }
     )
+    cookie.remove("ubicacion", {path: '/'})
+    cookie.set("ubicacion","Viaje", {path: '/'})
     API.get("/reportes/select/all").then(({data}) => {
       if(Boolean(data)){
         var aux = []
@@ -91,7 +103,7 @@ function Map() {
         setReportes(aux)
       }
     });
-    const intervalReportes = setInterval(() => {
+    setInterval(() => {
       API.get("/reportes/select/all").then(({data}) => {
         if(Boolean(data)){
           var aux = []
@@ -106,7 +118,7 @@ function Map() {
 
   const getDirections = () => {
     setViaje(true);
-    const directionsService = new window.google.maps.DirectionsService();
+    var directionsService = new window.google.maps.DirectionsService();
 
     var origin = currentLocation;
       var destination = markerPos;
@@ -137,10 +149,10 @@ function Map() {
     
     const interval = setInterval(() => {
 
-      var origin = currentLocation;
-      var destination = markerPos;
+      origin = currentLocation;
+      destination = markerPos;
 
-      const directionsService = new window.google.maps.DirectionsService();
+      directionsService = new window.google.maps.DirectionsService();
 
       navigator?.geolocation.getCurrentPosition(
         ({ coords: { latitude: lat, longitude: lng } }) => {
@@ -174,7 +186,7 @@ function Map() {
           }
         );
       } else {
-        console.log('Please mark your destination in the map first!');
+        console.log('Please mark yoursetFinalViaje destination in the map first!');
       }
     }, 10000);
 
@@ -192,7 +204,13 @@ function Map() {
         <div className='places-container'>
           <Button className='botones_aplicacion' onClick={getDirections}>Iniciar Viaje</Button>
         </div>
-      ) : null}
+      ) : (
+        <div className='places-container'>
+          <Button className='botones_aplicacion_rojos' onClick={() => {
+            setFinalViaje(true)
+          }}>Terminar Viaje</Button>
+        </div>
+      )}
       
       <GoogleMap
        zoom={17}
@@ -317,16 +335,22 @@ function Map() {
 
       </GoogleMap>
 
+      <Footer />
+
       <Dialog
        open={finalViaje}>
         <DialogTitle id="alert-dialog-title" className='d-flex align-items-center'>
           <PedalBike/>
-          <div className='d-flex ms-5'>Esperamos tu viaje fuese plasentero</div>
+          <div className='d-flex ms-5'>¿Quieres finalizar tu viaje?</div>
         </DialogTitle>
-        <DialogActions>
+        <DialogActions className='d-flex justify-content-between'> 
+          <Button className="btn btn-danger" onClick={() => {
+            setFinalViaje(false)
+          }}>No</Button>
           <Button className='btn btn-success' onClick={() => {
+            Alerta("Viaje finalizado","success")
             navigate(("/"));
-          }}>Terminar</Button>
+          }}>Si</Button>
         </DialogActions>
       </Dialog>
 
@@ -381,8 +405,7 @@ function Map() {
           <Button className='btn btn-success' onClick={() => {
             setBiciusuario(cookie.get("bcusuario"));
             if(!biciusuario){
-              setMessage("No puedes calificar sin iniciar sesión");
-              setError(true);
+              Alerta("No puedes calificar sin iniciar sesión", "error")
             }
             else{
               if(auxCalificacion+1){
@@ -393,26 +416,19 @@ function Map() {
                 }
                 API.post("/calificaciones/save", dict).then(({data}) => {
                   if (data !== "Success"){
-                    setMessage(data);
-                    setError(true);
+                    Alerta(data, "error")
                   }
                   else{
-                    setMessage("Calificación almacenada");
-                    setSucces(true);
+                    Alerta("Calificación almacenada","success")
                     handleCloseCalificacionDialog();
                     setSelectedReporte(null);
                   }
                 })
               }
               else{
-                setMessage("No seleccionaste ninguna estrella");
-                setError(true);
+                Alerta("No seleccionaste ninguna estrella", "error")
               }
             }
-            setTimeout(() => {
-              setError(false);
-              setSucces(false);
-            }, 3000);
           }}>Calificar</Button>
         </DialogActions>
       </Dialog>
@@ -428,7 +444,7 @@ function Map() {
         </DialogTitle>
         <DialogContent id ="alert-dialog-description">
           Por favor ingresa el motivo de tu reporte y confirmalo.
-          <Box sx={{display:"flex", flexWrap:"wrap", justifyContent:"space-around" }}>
+          <Box>
             <div>
               <FormControl className="mt-5" sx={{ m: 1, width: '25ch' }} variant="outlined">
                 <InputLabel>Motivo del Reporte</InputLabel>
@@ -441,12 +457,24 @@ function Map() {
                 </Select>
               </FormControl>
             </div>
+            <div>
+              <TextField
+               autoFocus
+               required
+               margin="dense"
+               label="Descripción del hecho"
+               fullWidth
+               multiline
+               onChange={(e) => {setDesc(e.target.value)}}
+               variant="standard"
+               inputProps={{maxLength : 250}}/>
+              </div>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button className='btn btn-danger' onClick={handleCloseReportDialog}>Cancelar</Button>
           <Button className='btn btn-success' onClick={() => {
-            if(tipoLugar === "Crash" || tipoLugar === "Robber"){
+            if((tipoLugar === "Crash" || tipoLugar === "Robber") && desc !== ""){
               var aux = null;
               if(biciusuario){
                 aux = biciusuario.ident;
@@ -454,23 +482,24 @@ function Map() {
               var dict = {
                 ident: aux,
                 tipo: tipoLugar,
+                descripcion: desc,
                 latitud: info.lat,
                 longitud: info.lng,
-                calificacion: 0.0,
-                cantidadCalificaciones: 0,
               }
+              console.log(dict)
               API.post("/reportes/save",dict).then(({data}) => {
                 console.log(data);
                 reportes.push(dict)
                 handleCloseReportDialog();
+                Alerta("Reporte almacenado","success");
               })
+            }
+            if(desc === ""){
+              Alerta("Porfavor ingresa una descripción de lo sucedido","error")
             }
           }}>Reportar</Button>
         </DialogActions>
       </Dialog>
-
-      {success ? <SuccessMessage message = {message}/> : `` }
-      {error ? <InstantMessage message = {message}/> : `` }
 
     </>
   );
